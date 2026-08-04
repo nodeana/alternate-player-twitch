@@ -6343,6 +6343,11 @@ function ЗавершитьРаботу(лБыстро) {
 			сЗапрос: 'ЭтотКаналУжеОткрыт',
 			сКанал
 		}, пОтвет => {
+			// No response is normal when the channel is not open in another tab.
+			// Without checking lastError, Chrome logs: "Unchecked runtime.lastError: The message port closed before a response was received."
+			if (chrome.runtime.lastError) {
+				return;
+			}
 			if (пОтвет === true) {
 				м_Отладка.ЗавершитьРаботуИПоказатьСообщение('J0211');
 			}
