@@ -34,11 +34,6 @@ function задатьАдресСтраницы(сАдрес, лЗаменить
 	location[лЗаменить ? 'replace' : 'assign'](сАдрес);
 }
 
-function вставитьНаСтраницу(фВставить) {
-	// MV3 fix: Call function directly instead of injecting inline script (CSP violation)
-	фВставить();
-}
-
 function этотАдресМожноПеренаправлять(оАдрес) {
 	return !оАдрес.search.includes(АДРЕС_НЕ_ПЕРЕНАПРАВЛЯТЬ);
 }
@@ -454,42 +449,6 @@ function вставитьНашуКнопкуВПервыйРаз() {
 	}
 }
 
-function перехватитьФункции() {
-	let _лНеПерехватывать = false;
-	window.addEventListener('tw5-неперехватывать', () => {
-		_лНеПерехватывать = true;
-	});
-	const oTitleDescriptor = Object.getOwnPropertyDescriptor(Document.prototype, 'title');
-	Object.defineProperty(document, 'title', {
-		configurable: oTitleDescriptor.configurable,
-		enumerable: oTitleDescriptor.enumerable,
-		get() {
-			return oTitleDescriptor.get.call(this);
-		},
-		set(title) {
-			if (_лНеПерехватывать) {
-				oTitleDescriptor.set.call(this, title);
-			} else if (this.documentElement.hasAttribute('data-tw5-перенаправление')) {} else {
-				oTitleDescriptor.set.call(this, title);
-				window.dispatchEvent(new CustomEvent('tw5-изменензаголовок'));
-			}
-		}
-	});
-	const fPushState = history.pushState;
-	history.pushState = function(state, title) {
-		if (_лНеПерехватывать) {
-			fPushState.apply(this, arguments);
-		} else if (document.documentElement.hasAttribute('data-tw5-перенаправление')) {} else {
-			const сБыло = location.pathname;
-			fPushState.apply(this, arguments);
-			if (сБыло !== location.pathname) {
-				oTitleDescriptor.set.call(document, 'Twitch');
-				window.dispatchEvent(new CustomEvent('tw5-pushstate'));
-			}
-		}
-	};
-}
-
 function ждатьЗагрузкуДомика() {
 	return new Promise(фВыполнить => {
 		if (document.readyState !== 'loading') {
@@ -528,17 +487,6 @@ function вставитьСторонниеРасширения() {
 		// No need to remove elements - BTTV emotes work via FFZ integration
 	}
 	});
-}
-
-function разрешитьРаботуЧата() {
-	const fGetItem = Storage.prototype.getItem;
-	Storage.prototype.getItem = function(сИмя) {
-		let сЗначение = fGetItem.apply(this, arguments);
-		if (сИмя === 'TwitchCache:Layout' && сЗначение) {
-			сЗначение = сЗначение.replace('"isRightColumnClosedByUserAction":true', '"isRightColumnClosedByUserAction":false');
-		}
-		return сЗначение;
-	};
 }
 
 function изменитьСтильЧата() {
@@ -581,7 +529,7 @@ function удалитьХвостыСтаройВерсии() {}
 ДобавитьОбработчикИсключений(() => {
 	м_Журнал.Окак(`[content.js] Запущен ${performance.now().toFixed()}мс ${location.href}`);
 	if (разобратьАдрес(location).сСтраница === 'ЧАТ_КАНАЛА') {
-		вставитьНаСтраницу(разрешитьРаботуЧата);
+		// Storage hook lives in pagehook.js (MAIN world)
 		if (window.top !== window) {
 			вставитьСторонниеРасширения();
 			изменитьСтильЧата();
@@ -595,13 +543,11 @@ function удалитьХвостыСтаройВерсии() {}
 	window.addEventListener('click', обработатьPointerDownИClick, true);
 	window.addEventListener('popstate', обработатьPopState);
 	м_Настройки.Восстановить().then(() => {
-		измененАдресСтраницы('LOAD');
+		// pagehook.js (MAIN world) dispatches tw5-pushstate on SPA navigations
 		window.addEventListener('tw5-pushstate', обработатьPushState);
-		вставитьНаСтраницу(перехватитьФункции);
-		// Insert button for both chat page and main live stream page
+		измененАдресСтраницы('LOAD');
 		const адрес = разобратьАдрес(location);
 		if (адрес.сСтраница === 'ЧАТ_КАНАЛА' || адрес.сСтраница === 'ВОЗМОЖНО_ПРЯМАЯ_ТРАНСЛЯЦИЯ') {
-			// For main live stream page, wait a bit for the DOM to be ready
 			if (адрес.сСтраница === 'ВОЗМОЖНО_ПРЯМАЯ_ТРАНСЛЯЦИЯ') {
 				setTimeout(() => вставитьНашуКнопкуВПервыйРаз(), 1000);
 			} else {

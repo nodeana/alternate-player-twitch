@@ -1,9 +1,9 @@
 {
 	"manifest_version": 3,
-	"minimum_chrome_version": "88",
+	"minimum_chrome_version": "102",
 	"name": "Alternate Player for Twitch.tv",
 	"short_name": "Alternate Player",
-	"version": "2025.6.16",
+	"version": "2025.8.4",
 	"description": "__MSG_M0001__",
 	"icons": {
 		"128": "manifest.png"
@@ -63,7 +63,23 @@
 				"gqltoken.js"
 			],
 			"all_frames": true,
-			"run_at": "document_start"
+			"run_at": "document_start",
+			"world": "MAIN"
+		},
+		{
+			"matches": [
+				"https://www.twitch.tv/*",
+				"https://m.twitch.tv/*"
+			],
+			"exclude_matches": [
+				"https://www.twitch.tv/popout/"
+			],
+			"js": [
+				"pagehook.js"
+			],
+			"all_frames": true,
+			"run_at": "document_start",
+			"world": "MAIN"
 		},
 		{
 			"matches": [
