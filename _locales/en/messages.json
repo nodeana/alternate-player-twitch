@@ -280,6 +280,21 @@
 	{
 		"message": "A change in your login status on Twitch.tv website has been detected. Reload the page to continue."
 	},
+	"J0230":
+	{
+		"message": "The page will reload automatically in $SECONDS$ s…",
+		"placeholders":
+		{
+			"SECONDS":
+			{
+				"content": "$1"
+			}
+		}
+	},
+	"J0231":
+	{
+		"message": "Automatic reload cancelled. Reload the page manually when you are ready."
+	},
 	"F0501":
 	{
 		"message": "Category:"
