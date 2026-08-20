@@ -9,6 +9,12 @@ html .emote-picker{max-width:100%;width:var(--tw5-ширинаспискасма
 .community-points-summary+.tw-transition>div>div>.tw-balloon{max-width:unset}
 .reward-center__content{max-width:calc(100vw - 2rem)}
 html .viewer-card-layer__draggable{width:unset}
+html.tw5-drops-active .community-points-summary ~ * svg,
+html.tw5-drops-active [class*="community-highlight"] svg,
+html.tw5-drops-active a[href*="/inventory"] svg,
+html.tw5-drops-active a[href*="/drops"] svg,
+html.tw5-drops-active button[aria-label*="Drop" i] svg,
+html.tw5-drops-active button[aria-label*="Invent" i] svg{color:#bf94ff!important;fill:currentColor!important}
 .bttv-rs-popover[class*=bttv-EmoteMenuPopover-module__popover-]{top:auto!important;left:auto!important;right:1rem!important;bottom:10rem!important;max-width:100vw!important}
 @media (max-width:20.9rem){
 	.bttv-rs-popover[class*=bttv-EmoteMenuPopover-module__popover-]{right:0!important}
@@ -27,8 +33,3 @@ html .viewer-card-layer__draggable{width:unset}
 	.chat-input>div:last-child>div:first-child{width:100%}
 	.chat-input>div:last-child>div:last-child>button{padding-top:0;padding-bottom:0}
 }
-/* Hide BTTV emote menu overlay - injected script causes UI issues */
-div[class*=bttv-EmoteMenu-module__emoteMenu-]{display:none!important}
-div[class*=bttv-EmoteMenu-module__header-]{display:none!important}
-div[class*=bttv-EmoteMenu-module__emotes-]{display:none!important}
-div[class*=bttv-Sidebar-module__sidebar-]{display:none!important}

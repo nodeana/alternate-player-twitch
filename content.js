@@ -482,16 +482,14 @@ function ждатьЗагрузкуСтраницы() {
 }
 
 function вставитьСторонниеРасширения() {
+	// Native BTTV/FFZ do not inject into twitch.tv iframes whose parent is chrome-extension://
+	// https://bugs.chromium.org/p/chromium/issues/detail?id=599167
 	chrome.runtime.sendMessage({
 		request: 'InsertThirdPartyExtensions'
-	}, response => {
+	}, () => {
 		if (chrome.runtime.lastError) {
 			console.error(`[content.js] Failed to send request for third-party extensions: ${chrome.runtime.lastError.message}`);
-	} else {
-		console.log(response.status);
-		// BTTV/FFZ scripts are now injected - they handle their own UI
-		// No need to remove elements - BTTV emotes work via FFZ integration
-	}
+		}
 	});
 }
 
@@ -507,9 +505,31 @@ function изменитьСтильЧата() {
 	(document.head || document.documentElement).appendChild(узСтиль);
 }
 
+function отправитьСлежениеЗаПросмотром(оСообщение) {
+	if (!ЭтоНепустаяСтрока(оСообщение.сАдрес) || !ЭтоНепустаяСтрока(оСообщение.сТело)) {
+		return;
+	}
+	if (!/^https:\/\/(?:[^/]+\.)?(?:twitch\.tv|ttvnw\.net)\//.test(оСообщение.сАдрес)) {
+		return;
+	}
+	fetch(оСообщение.сАдрес, {
+		method: 'POST',
+		credentials: 'include',
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+		},
+		body: `data=${encodeURIComponent(оСообщение.сТело)}`
+	}).catch((пПричина) => {
+		console.error('[content.js] Failed to send minute-watched:', пПричина);
+	});
+}
+
 function изменитьПоведениеЧата() {
 	window.addEventListener('click', оСобытие => {
 		if (оСобытие.button !== ЛЕВАЯ_КНОПКА) {
+			return;
+		}
+		if (оСобытие.target.closest('[class*="bttv-"],[class*="ffz-"],#bttv-settings,#ffz-settings')) {
 			return;
 		}
 		const узСсылка = оСобытие.target.closest('a[href^="http:"],a[href^="https:"],a[href]:not([href=""]):not([href^="#"]):not([href*=":"]):not([href$="/not-a-location"])');
@@ -542,7 +562,13 @@ function удалитьХвостыСтаройВерсии() {}
 	} catch (_) {}
 	м_Журнал.Окак(`[content.js] Запущен ${performance.now().toFixed()}мс ${location.href}`);
 	if (разобратьАдрес(location).сСтраница === 'ЧАТ_КАНАЛА') {
-		// Storage hook lives in pagehook.js (MAIN world)
+		chrome.runtime.onMessage.addListener((оСообщение, оОтправитель, фОтветить) => {
+			if (!оСообщение || оСообщение.сЗапрос !== 'minute-watched') {
+				return;
+			}
+			отправитьСлежениеЗаПросмотром(оСообщение);
+			фОтветить({status: 'sent'});
+		});
 		if (window.top !== window) {
 			вставитьСторонниеРасширения();
 			изменитьСтильЧата();

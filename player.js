@@ -5588,7 +5588,7 @@ const м_Загрузчик = (() => {
 
 const м_Twitch = (() => {
 	const ИНТЕРВАЛ_ОБНОВЛЕНИЯ_МЕТАДАННЫХ_ТРАНСЛЯЦИИ = 6e4;
-	const ИНТЕРВАЛ_СЛЕЖЕНИЯ_ЗА_ПРОСМОТРОМ = 6e4;
+	const ИНТЕРВАЛ_СЛЕЖЕНИЯ_ЗА_ПРОСМОТРОМ = 2e4;
 	let _сАдресСлеженияЗаПросмотром = 'https://spade.twitch.tv/track';
 	let _сКодКанала = '';
 	let _сИдКанала = '';
@@ -5602,10 +5602,12 @@ const м_Twitch = (() => {
 	let _сТокенGql = '';
 	let _чТокенGqlПротухнетПосле = 0;
 	let _sPlaySessionID = '';
+	let _сИдИгры = '';
+	let _сНазваниеИгры = '';
 	let _оОтменаОбновленияМетаданных = null;
 	let _чТаймерСлеженияЗаПросмотром = 0;
 	function ОчиститьДанныеТрансляции() {
-		_сИдТрансляции = _сАдресЗаписи = '';
+		_сИдТрансляции = _сАдресЗаписи = _сИдИгры = _сНазваниеИгры = '';
 	}
 	function ПолучитьАдресКанала(лНеПеренаправлять) {
 		return лНеПеренаправлять ? `https://www.twitch.tv/${encodeURIComponent(_сКодКанала)}?${АДРЕС_НЕ_ПЕРЕНАПРАВЛЯТЬ}` : `https://www.twitch.tv/${encodeURIComponent(_сКодКанала)}`;
@@ -6147,6 +6149,7 @@ const м_Twitch = (() => {
 					user(id: $id) {
 						broadcastSettings {
 							game {
+								id
 								displayName
 								slug
 							}
@@ -6194,6 +6197,13 @@ const м_Twitch = (() => {
 					оМетаданные.сНазваниеТрансляции = сНазваниеТрансляции.trim() || Текст('J0103');
 				}
 				оМетаданные.сНазваниеИгры = цепочка(oUser, 'broadcastSettings', 'game', 'displayName');
+				if (typeof оМетаданные.сНазваниеИгры == 'string') {
+					_сНазваниеИгры = оМетаданные.сНазваниеИгры;
+				}
+				const сИдИгры = цепочка(oUser, 'broadcastSettings', 'game', 'id');
+				if (ЭтоНепустаяСтрока(сИдИгры)) {
+					_сИдИгры = сИдИгры;
+				}
 				const сАдресИгры = цепочка(oUser, 'broadcastSettings', 'game', 'slug');
 				if (сАдресИгры) {
 					оМетаданные.сАдресИгры = получитьАдресКатегории(сАдресИгры);
@@ -6245,21 +6255,132 @@ const м_Twitch = (() => {
 			_чТаймерСлеженияЗаПросмотром = 0;
 		}
 	}
+	function закодироватьДанныеСлежения(пДанные) {
+		return btoa(unescape(encodeURIComponent(JSON.stringify(пДанные))));
+	}
+	async function сжатьСлежениеGzipBase64(сJson) {
+		const оПоток = new Blob([сJson]).stream().pipeThrough(new CompressionStream('gzip'));
+		const буф = await new Response(оПоток).arrayBuffer();
+		const байты = new Uint8Array(буф);
+		let сДвоичные = '';
+		for (let ы = 0; ы < байты.length; ы++) {
+			сДвоичные += String.fromCharCode(байты[ы]);
+		}
+		return btoa(сДвоичные);
+	}
+	function послатьСлежениеВФон(сАдрес, сТело) {
+		try {
+			chrome.runtime.sendMessage({
+				request: 'SendMinuteWatched',
+				url: сАдрес,
+				body: сТело
+			}, () => {
+				void chrome.runtime.lastError;
+			});
+		} catch (_) {}
+	}
+	function задатьСессиюDropsВЧате(лАктивна) {
+		if (!м_Настройки.Получить('лПолноценныйЧат')) {
+			return;
+		}
+		try {
+			chrome.runtime.sendMessage({
+				request: 'SetDropsSession',
+				active: Boolean(лАктивна)
+			}, () => {
+				void chrome.runtime.lastError;
+			});
+		} catch (_) {}
+	}
+	async function обновитьСессиюDrops() {
+		if (!м_Настройки.Получить('лПолноценныйЧат')) {
+			return false;
+		}
+		const оТело = JSON.stringify({
+			operationName: 'DropCurrentSessionContext',
+			variables: {
+				channelID: String(_сИдКанала),
+				channelLogin: ''
+			},
+			extensions: {
+				persistedQuery: {
+					version: 1,
+					sha256Hash: '4d06b702d25d652afb9ef835d2a550031f1cf762b193523a92166f40ea3d142b'
+				}
+			}
+		});
+		const оРезультат = await отправитьЗапросGql(null, оТело, null, true, true, false, 'сессия drops');
+		const оСессия = цепочка(оРезультат, 'data', 'currentUser', 'dropCurrentSession');
+		const сИдКаналаСессии = String(цепочка(оСессия, 'channel', 'id') || цепочка(оСессия, 'channelID') || '');
+		const лАктивна = Boolean(оСессия) && (!сИдКаналаСессии || сИдКаналаСессии === String(_сИдКанала));
+		м_Журнал.Вот(`[Twitch] Сессия drops активна=${лАктивна} ${м_Журнал.O(оСессия)}`);
+		задатьСессиюDropsВЧате(лАктивна);
+		return лАктивна;
+	}
+	function отправитьДанныеСлеженияЧерезЧат(сАдрес, сТело) {
+		const чИдВкладки = получитьТекущуюВкладку.чИдВкладки;
+		if (!Number.isSafeInteger(чИдВкладки)) {
+			return Promise.reject('Нет вкладки');
+		}
+		return new Promise((фВыполнить, фОтказаться) => {
+			chrome.tabs.sendMessage(чИдВкладки, {
+				сЗапрос: 'minute-watched',
+				сАдрес,
+				сТело
+			}, () => {
+				if (chrome.runtime.lastError) {
+					фОтказаться(chrome.runtime.lastError.message);
+					return;
+				}
+				фВыполнить();
+			});
+		});
+	}
 	const отправитьДанныеСлеженияЗаПросмотром = ДобавитьОбработчикИсключений(() => {
 		Проверить(_сИдТрансляции && _сИдКанала && _сИдЗрителя);
-		const оОтправить = new URLSearchParams();
-		оОтправить.set('data', btoa(JSON.stringify([ {
+		if (!м_Настройки.Получить('лПолноценныйЧат')) {
+			return;
+		}
+		const моСобытия = [ {
 			event: 'minute-watched',
 			properties: {
-				broadcast_id: _сИдТрансляции,
-				channel_id: _сИдКанала,
-				user_id: Number(_сИдЗрителя),
-				player: 'site'
+				broadcast_id: String(_сИдТрансляции),
+				channel_id: String(_сИдКанала),
+				channel: _сКодКанала,
+				client_time: new Date().toISOString(),
+				game: _сНазваниеИгры || '',
+				game_id: _сИдИгры ? String(_сИдИгры) : '',
+				hidden: false,
+				is_live: true,
+				live: true,
+				logged_in: true,
+				minutes_logged: 1,
+				muted: false,
+				user_id: Number(_сИдЗрителя)
 			}
-		} ])));
-		м_Загрузчик.Загрузить(null, 'POST', _сАдресСлеженияЗаПросмотром, ЗАГРУЖАТЬ_МЕТАДАННЫЕ_НЕ_ДОЛЬШЕ, null, оОтправить, 'слежение за просмотром', false, 'none').catch(пПричина => {
+		} ];
+		const сJson = JSON.stringify(моСобытия);
+		const сТело = закодироватьДанныеСлежения(моСобытия);
+		послатьСлежениеВФон('https://spade.twitch.tv/track', сТело);
+		if (_сАдресСлеженияЗаПросмотром && _сАдресСлеженияЗаПросмотром !== 'https://spade.twitch.tv/track') {
+			послатьСлежениеВФон(_сАдресСлеженияЗаПросмотром, сТело);
+		}
+		отправитьДанныеСлеженияЧерезЧат(_сАдресСлеженияЗаПросмотром, сТело).catch(ЗАГЛУШКА);
+		сжатьСлежениеGzipBase64(сJson).then(сGzip => {
+			return отправитьЗапросGql(null, `mutation SendEvents($input: SendSpadeEventsInput!) {
+					sendSpadeEvents(input: $input) {
+						statusCode
+					}
+				}`, {
+				input: {
+					data: сGzip,
+					repository: 'twilight',
+					encoding: 'GZIP_B64'
+				}
+			}, true, true, false, 'spade events');
+		}).then(() => обновитьСессиюDrops()).catch(пПричина => {
 			if (typeof пПричина == 'string') {
-				м_Журнал.Ой(`[Twitch] Не удалось отправить данные слежения за просмотром. ${пПричина}`);
+				м_Журнал.Ой(`[Twitch] Не удалось отправить слежение / drops. ${пПричина}`);
 			} else {
 				м_Отладка.ПойманоИсключение(пПричина);
 			}
