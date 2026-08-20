@@ -37,21 +37,21 @@ When you visit a Twitch channel page, the extension detects whether the channel 
 3. Enable **Developer mode** (top right)
 4. Click **Load unpacked** and select the repository folder
 
-## File overview
+## Layout
 
-| File | Purpose |
+`manifest.json` and `_locales/` stay at the repository root (Chrome requires that). The rest is grouped by role:
+
+| Path | Purpose |
 |---|---|
-| `background.js` | MV3 service worker that detects FFZ/BTTV extensions and injects them into chat |
-| `content.js` | Content script on twitch.tv that detects live channels and triggers the redirect |
-| `common.js` | Shared utilities: logging, settings, i18n, GQL helpers |
-| `player.js` | Full custom HLS player logic, UI, and buffering engine |
-| `player.html` | Player page shell |
-| `gqltoken.js` | Intercepts Twitch GQL integrity tokens for authenticated stream requests |
-| `betterttv.js` | BTTV integration script injected into the chat frame |
-| `avalon.js` | Bundled FFZ script injected into the chat frame |
-| `rules.json` | declarativeNetRequest rules for header spoofing and chat iframe CSP removal |
-| `worker.js` | Web worker for HLS segment processing |
-| `wasm.wasm` | WebAssembly module for stream processing |
+| `src/background/` | MV3 service worker (BTTV/FFZ injection, watch events) |
+| `src/content/` | Scripts and CSS injected on twitch.tv |
+| `src/shared/` | Shared utilities used by the player page and content scripts |
+| `src/player/` | Player page, HLS worker, WASM, and player UI assets |
+| `src/rules.json` | declarativeNetRequest rules |
+| `assets/` | Extension icon |
+| `vendor/` | Unused local BTTV/FFZ bundles (injection uses the CDN) |
+| `sources/` | WASM text source (`wasm.wat`) |
+| `docs/` | Extra notes |
 
 ## Notes
 

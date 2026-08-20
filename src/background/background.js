@@ -10,8 +10,6 @@ const FFZ_IDS = new Set([
 	'djkpepcignmpfblhbfpmlhoindhndkdj'
 ]);
 
-let chatFrame = null;
-
 chrome.runtime.onInstalled.addListener((details) => {
 	if (details.reason === 'install') {
 		console.log('Extension installed');
@@ -20,8 +18,85 @@ chrome.runtime.onInstalled.addListener((details) => {
 	}
 });
 
+let chatFrame = null;
+
+async function runInChatMainWorld(tabId, func, args) {
+	if (!Number.isInteger(tabId)) {
+		throw new Error('No tab');
+	}
+	if (!chatFrame || chatFrame.tabId !== tabId) {
+		throw new Error('Chat frame not ready');
+	}
+	await chrome.scripting.executeScript({
+		target: {tabId, frameIds: [chatFrame.frameId]},
+		world: 'MAIN',
+		func,
+		args
+	});
+}
+
+async function sendMinuteWatchedViaChatFrame(tabId, url, body) {
+	await runInChatMainWorld(tabId, (watchUrl, watchBody) => {
+		if (!/^https:\/\/(?:[^/]+\.)?(?:twitch\.tv|ttvnw\.net)\//.test(watchUrl)) {
+			return;
+		}
+		const formBody = `data=${encodeURIComponent(watchBody)}`;
+		const blob = new Blob([formBody], {type: 'application/x-www-form-urlencoded;charset=UTF-8'});
+		if (navigator.sendBeacon(watchUrl, blob)) {
+			return;
+		}
+		fetch(watchUrl, {
+			method: 'POST',
+			mode: 'no-cors',
+			credentials: 'include',
+			body: formBody
+		}).catch(() => {});
+	}, [url, body]);
+}
+
+async function updateDropsCacheInChatFrame(tabId, availResult, sessionResult) {
+	await runInChatMainWorld(tabId, (avail, session) => {
+		document.dispatchEvent(new CustomEvent('tw5-drops-cache-update', {
+			bubbles: true,
+			detail: {
+				availResult: avail,
+				sessionResult: session
+			}
+		}));
+	}, [availResult, sessionResult]);
+}
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	if (!message) {
+		return false;
+	}
+	if (message.request === 'update-drops-cache') {
+		const tabId = message.tabId ?? sender.tab?.id;
+		if (!Number.isInteger(tabId)) {
+			sendResponse({status: 'No tab.'});
+			return false;
+		}
+		updateDropsCacheInChatFrame(tabId, message.availResult, message.sessionResult)
+			.then(() => sendResponse({status: 'ok'}))
+			.catch(() => sendResponse({status: 'skipped'}));
+		return true;
+	}
+	if (message.request === 'minute-watched') {
+		const tabId = message.tabId ?? sender.tab?.id;
+		if (!Number.isInteger(tabId)) {
+			sendResponse({status: 'No tab.'});
+			return false;
+		}
+		sendMinuteWatchedViaChatFrame(tabId, message.url, message.body)
+			.then(() => sendResponse({status: 'sent'}))
+			.catch(() => sendResponse({status: 'skipped'}));
+		return true;
+	}
+	if (message.request === 'RegisterChatFrame') {
+		if (sender.tab && sender.tab.id != null && sender.frameId != null) {
+			chatFrame = {tabId: sender.tab.id, frameId: sender.frameId};
+		}
+		sendResponse({status: 'ok'});
 		return false;
 	}
 	if (message.request === 'InsertThirdPartyExtensions') {
@@ -38,64 +113,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 			});
 		return true;
 	}
-	if (message.request === 'SendMinuteWatched') {
-		sendMinuteWatched(message.url, message.body)
-			.then(() => sendResponse({status: 'sent'}))
-			.catch((error) => {
-				console.error('SendMinuteWatched failed:', error);
-				sendResponse({status: 'failed'});
-			});
-		return true;
-	}
-	if (message.request === 'SetDropsSession') {
-		setDropsSession(Boolean(message.active))
-			.then(() => sendResponse({status: 'ok'}))
-			.catch(() => sendResponse({status: 'failed'}));
-		return true;
-	}
 });
-
-function postWatchFromPage(url, body) {
-	return fetch(url, {
-		method: 'POST',
-		credentials: 'include',
-		headers: {
-			'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-		},
-		body: 'data=' + encodeURIComponent(body)
-	}).then((response) => response.status);
-}
-
-function toggleDropsClass(active) {
-	document.documentElement.classList.toggle('tw5-drops-active', Boolean(active));
-}
-
-async function sendMinuteWatched(url, body) {
-	if (!chatFrame || typeof url != 'string' || typeof body != 'string') {
-		return;
-	}
-	if (!/^https:\/\/(?:[^/]+\.)?(?:twitch\.tv|ttvnw\.net)\//.test(url)) {
-		return;
-	}
-	await chrome.scripting.executeScript({
-		target: {tabId: chatFrame.tabId, frameIds: [chatFrame.frameId]},
-		world: 'MAIN',
-		func: postWatchFromPage,
-		args: [url, body]
-	});
-}
-
-async function setDropsSession(active) {
-	if (!chatFrame) {
-		return;
-	}
-	await chrome.scripting.executeScript({
-		target: {tabId: chatFrame.tabId, frameIds: [chatFrame.frameId]},
-		world: 'MAIN',
-		func: toggleDropsClass,
-		args: [active]
-	});
-}
 
 function injectThirdPartyScripts(scriptUrls) {
 	const inject = (url) => {

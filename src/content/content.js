@@ -494,7 +494,7 @@ function вставитьСторонниеРасширения() {
 }
 
 function изменитьСтильЧата() {
-	const сАдрес = ПолучитьURLРесурсаРасширения('content.css');
+	const сАдрес = ПолучитьURLРесурсаРасширения('src/content/content.css');
 	if (!сАдрес) {
 		return;
 	}
@@ -512,16 +512,17 @@ function отправитьСлежениеЗаПросмотром(оСообщ
 	if (!/^https:\/\/(?:[^/]+\.)?(?:twitch\.tv|ttvnw\.net)\//.test(оСообщение.сАдрес)) {
 		return;
 	}
+	const сТело = `data=${encodeURIComponent(оСообщение.сТело)}`;
+	const оBlob = new Blob([сТело], {type: 'application/x-www-form-urlencoded;charset=UTF-8'});
+	if (navigator.sendBeacon(оСообщение.сАдрес, оBlob)) {
+		return;
+	}
 	fetch(оСообщение.сАдрес, {
 		method: 'POST',
+		mode: 'no-cors',
 		credentials: 'include',
-		headers: {
-			'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-		},
-		body: `data=${encodeURIComponent(оСообщение.сТело)}`
-	}).catch((пПричина) => {
-		console.error('[content.js] Failed to send minute-watched:', пПричина);
-	});
+		body: сТело
+	}).catch(ЗАГЛУШКА);
 }
 
 function изменитьПоведениеЧата() {
@@ -562,12 +563,30 @@ function удалитьХвостыСтаройВерсии() {}
 	} catch (_) {}
 	м_Журнал.Окак(`[content.js] Запущен ${performance.now().toFixed()}мс ${location.href}`);
 	if (разобратьАдрес(location).сСтраница === 'ЧАТ_КАНАЛА') {
+		chrome.runtime.sendMessage({request: 'RegisterChatFrame'}, () => {
+			void chrome.runtime.lastError;
+		});
 		chrome.runtime.onMessage.addListener((оСообщение, оОтправитель, фОтветить) => {
-			if (!оСообщение || оСообщение.сЗапрос !== 'minute-watched') {
+			if (!оСообщение || !оСообщение.сЗапрос) {
 				return;
 			}
-			отправитьСлежениеЗаПросмотром(оСообщение);
-			фОтветить({status: 'sent'});
+			if (оСообщение.сЗапрос === 'minute-watched') {
+				отправитьСлежениеЗаПросмотром(оСообщение);
+				фОтветить({status: 'sent'});
+				return true;
+			}
+			if (оСообщение.сЗапрос === 'update-drops-cache') {
+				const оДетали = {
+					availResult: оСообщение.availResult,
+					sessionResult: оСообщение.sessionResult
+				};
+				document.dispatchEvent(new CustomEvent('tw5-drops-cache-update', {
+					bubbles: true,
+					detail: оДетали
+				}));
+				фОтветить({status: 'ok'});
+				return true;
+			}
 		});
 		if (window.top !== window) {
 			вставитьСторонниеРасширения();

@@ -47,8 +47,8 @@ Implement a split stream feature allowing users to watch multiple Twitch streams
 
 #### URL Structure
 ```
-Single stream:  chrome-extension://[ID]/player.html#channelname
-Split streams: chrome-extension://[ID]/player.html#chan1,chan2
+Single stream:  chrome-extension://[ID]/src/player/player.html#channelname
+Split streams: chrome-extension://[ID]/src/player/player.html#chan1,chan2
 Legacy support: ?channel=name& ?channels=name1,name2
 ```
 

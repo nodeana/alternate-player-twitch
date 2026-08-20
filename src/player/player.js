@@ -980,7 +980,7 @@ const м_Помойка = (() => {
 				if (буфБарахло.byteLength) {
 					м_Журнал.Вот(`[Помойка] Выбрасываю ${буфБарахло.byteLength} байтов`);
 					if (this._оРабочийПоток === null) {
-						this._оРабочийПоток = new Worker('/recycler.js');
+						this._оРабочийПоток = new Worker(chrome.runtime.getURL('src/player/recycler.js'));
 					}
 					this._кбВПомойке += буфБарахло.byteLength;
 					this._оРабочийПоток.postMessage(буфБарахло, [ буфБарахло ]);
@@ -5296,7 +5296,7 @@ const м_Преобразователь = (() => {
 	}
 	function СоздатьРабочийПоток() {
 		м_Журнал.Вот('[Преобразование] Создаю рабочий поток');
-		_оРабочийПоток = new Worker('/worker.js');
+		_оРабочийПоток = new Worker(chrome.runtime.getURL('src/player/worker.js'));
 		_оРабочийПоток.addEventListener('message', ОбработатьОкончаниеПреобразования);
 		_оРабочийПоток.addEventListener('error', ОбработатьОшибкуПреобразования);
 		_оРабочийПоток.addEventListener('messageerror', ОбработатьОшибкуПреобразования);
@@ -6254,6 +6254,7 @@ const м_Twitch = (() => {
 			Проверить(_чТаймерСлеженияЗаПросмотром === 0);
 			_чТаймерСлеженияЗаПросмотром = setInterval(отправитьДанныеСлеженияЗаПросмотром, ИНТЕРВАЛ_СЛЕЖЕНИЯ_ЗА_ПРОСМОТРОМ);
 			отправитьДанныеСлеженияЗаПросмотром();
+			обновитьDropsВЧате().catch(ЗАГЛУШКА);
 		}
 	}
 	function завершитьСлежениеЗаПросмотром() {
@@ -6276,35 +6277,43 @@ const м_Twitch = (() => {
 		}
 		return btoa(сДвоичные);
 	}
-	function послатьСлежениеВФон(сАдрес, сТело) {
-		try {
-			chrome.runtime.sendMessage({
-				request: 'SendMinuteWatched',
-				url: сАдрес,
-				body: сТело
-			}, () => {
-				void chrome.runtime.lastError;
+	function запроситьДоступныеDrops() {
+		const моХеши = [
+			'782dad0f032942260171d2d80a654f88bdd0c5a9dddc392e9bc92218a0f42d20',
+			'9a62a09bce5b53e26e64a671e530bc599cb6aab1e5ba3cbd5d85966d3940716f'
+		];
+		const запросить = (сХеш) => {
+			const оТело = JSON.stringify({
+				operationName: 'DropsHighlightService_AvailableDrops',
+				variables: {
+					channelID: String(_сИдКанала)
+				},
+				extensions: {
+					persistedQuery: {
+						version: 1,
+						sha256Hash: сХеш
+					}
+				}
 			});
-		} catch (_) {}
-	}
-	function задатьСессиюDropsВЧате(лАктивна) {
-		if (!м_Настройки.Получить('лПолноценныйЧат')) {
-			return;
-		}
-		try {
-			chrome.runtime.sendMessage({
-				request: 'SetDropsSession',
-				active: Boolean(лАктивна)
-			}, () => {
-				void chrome.runtime.lastError;
+			return отправитьЗапросGql(null, оТело, null, true, true, false, 'drops disponibles').then(оРезультат => {
+				const кКампаний = (цепочка(оРезультат, 'data', 'channel', 'viewerDropCampaigns') || []).length;
+				if (кКампаний > 0 || !оРезультат.errors) {
+					return оРезультат;
+				}
+				throw 'empty';
 			});
-		} catch (_) {}
+		};
+		return запросить(моХеши[0]).catch(() => запросить(моХеши[1]));
 	}
-	async function обновитьСессиюDrops() {
-		if (!м_Настройки.Получить('лПолноценныйЧат')) {
-			return false;
+	function обновитьDropsВЧате() {
+		if (!м_Настройки.Получить('лПолноценныйЧат') || !_сИдКанала) {
+			return Promise.resolve(false);
 		}
-		const оТело = JSON.stringify({
+		const чИдВкладки = получитьТекущуюВкладку.чИдВкладки;
+		if (!Number.isSafeInteger(чИдВкладки)) {
+			return Promise.resolve(false);
+		}
+		const оЗапросСессии = JSON.stringify({
 			operationName: 'DropCurrentSessionContext',
 			variables: {
 				channelID: String(_сИдКанала),
@@ -6317,13 +6326,45 @@ const м_Twitch = (() => {
 				}
 			}
 		});
-		const оРезультат = await отправитьЗапросGql(null, оТело, null, true, true, false, 'сессия drops');
-		const оСессия = цепочка(оРезультат, 'data', 'currentUser', 'dropCurrentSession');
-		const сИдКаналаСессии = String(цепочка(оСессия, 'channel', 'id') || цепочка(оСессия, 'channelID') || '');
-		const лАктивна = Boolean(оСессия) && (!сИдКаналаСессии || сИдКаналаСессии === String(_сИдКанала));
-		м_Журнал.Вот(`[Twitch] Сессия drops активна=${лАктивна} ${м_Журнал.O(оСессия)}`);
-		задатьСессиюDropsВЧате(лАктивна);
-		return лАктивна;
+		return Promise.all([
+			запроситьДоступныеDrops().catch(пПричина => {
+				console.warn('[tw5-drops] AvailableDrops query failed:', пПричина);
+				return null;
+			}),
+			отправитьЗапросGql(null, оЗапросСессии, null, true, true, false, 'сессия drops').catch(пПричина => {
+				console.warn('[tw5-drops] DropCurrentSession query failed:', пПричина);
+				return null;
+			})
+		]).then(([оДоступные, оСессия]) => {
+			const кКампаний = (цепочка(оДоступные, 'data', 'channel', 'viewerDropCampaigns') || []).length;
+			const лСессия = Boolean(цепочка(оСессия, 'data', 'currentUser', 'dropCurrentSession'));
+			console.info(`[tw5-drops] player: campaigns=${кКампаний} session=${лСессия}`);
+			м_Журнал.Вот(`[Twitch] Drops в чате: кампаний=${кКампаний} сессия=${лСессия}`);
+			return new Promise((фВыполнить, фОтказаться) => {
+				chrome.tabs.sendMessage(чИдВкладки, {
+					сЗапрос: 'update-drops-cache',
+					availResult: оДоступные,
+					sessionResult: оСессия
+				}, () => {
+					if (!chrome.runtime.lastError) {
+						фВыполнить(кКампаний > 0 || лСессия);
+						return;
+					}
+					chrome.runtime.sendMessage({
+						request: 'update-drops-cache',
+						tabId: чИдВкладки,
+						availResult: оДоступные,
+						sessionResult: оСессия
+					}, () => {
+						if (chrome.runtime.lastError) {
+							фОтказаться(chrome.runtime.lastError.message);
+							return;
+						}
+						фВыполнить(кКампаний > 0 || лСессия);
+					});
+				});
+			});
+		});
 	}
 	function отправитьДанныеСлеженияЧерезЧат(сАдрес, сТело) {
 		const чИдВкладки = получитьТекущуюВкладку.чИдВкладки;
@@ -6336,11 +6377,22 @@ const м_Twitch = (() => {
 				сАдрес,
 				сТело
 			}, () => {
-				if (chrome.runtime.lastError) {
-					фОтказаться(chrome.runtime.lastError.message);
+				if (!chrome.runtime.lastError) {
+					фВыполнить();
 					return;
 				}
-				фВыполнить();
+				chrome.runtime.sendMessage({
+					request: 'minute-watched',
+					tabId: чИдВкладки,
+					url: сАдрес,
+					body: сТело
+				}, () => {
+					if (chrome.runtime.lastError) {
+						фОтказаться(chrome.runtime.lastError.message);
+						return;
+					}
+					фВыполнить();
+				});
 			});
 		});
 	}
@@ -6358,22 +6410,26 @@ const м_Twitch = (() => {
 				client_time: new Date().toISOString(),
 				game: _сНазваниеИгры || '',
 				game_id: _сИдИгры ? String(_сИдИгры) : '',
-				hidden: false,
+				hidden: Boolean(document.hidden),
 				is_live: true,
 				live: true,
+				location: 'channel',
 				logged_in: true,
 				minutes_logged: 1,
-				muted: false,
-				user_id: Number(_сИдЗрителя)
+				muted: Boolean(м_Настройки.Получить('лПриглушить')),
+				player: 'site',
+				user_id: Number(_сИдЗрителя),
+				...(_sPlaySessionID ? {play_session_id: _sPlaySessionID} : {}),
+				...(_сИдУстройства ? {device_id: _сИдУстройства} : {})
 			}
 		} ];
 		const сJson = JSON.stringify(моСобытия);
 		const сТело = закодироватьДанныеСлежения(моСобытия);
-		послатьСлежениеВФон('https://spade.twitch.tv/track', сТело);
-		if (_сАдресСлеженияЗаПросмотром && _сАдресСлеженияЗаПросмотром !== 'https://spade.twitch.tv/track') {
-			послатьСлежениеВФон(_сАдресСлеженияЗаПросмотром, сТело);
+		const сАдресSpade = 'https://spade.twitch.tv/track';
+		отправитьДанныеСлеженияЧерезЧат(сАдресSpade, сТело).catch(ЗАГЛУШКА);
+		if (_сАдресСлеженияЗаПросмотром && _сАдресСлеженияЗаПросмотром !== сАдресSpade) {
+			отправитьДанныеСлеженияЧерезЧат(_сАдресСлеженияЗаПросмотром, сТело).catch(ЗАГЛУШКА);
 		}
-		отправитьДанныеСлеженияЧерезЧат(_сАдресСлеженияЗаПросмотром, сТело).catch(ЗАГЛУШКА);
 		сжатьСлежениеGzipBase64(сJson).then(сGzip => {
 			return отправитьЗапросGql(null, `mutation SendEvents($input: SendSpadeEventsInput!) {
 					sendSpadeEvents(input: $input) {
@@ -6386,13 +6442,14 @@ const м_Twitch = (() => {
 					encoding: 'GZIP_B64'
 				}
 			}, true, true, false, 'spade events');
-		}).then(() => обновитьСессиюDrops()).catch(пПричина => {
+		}).catch(пПричина => {
 			if (typeof пПричина == 'string') {
-				м_Журнал.Ой(`[Twitch] Не удалось отправить слежение / drops. ${пПричина}`);
+				м_Журнал.Ой(`[Twitch] Не удалось отправить слежение. ${пПричина}`);
 			} else {
 				м_Отладка.ПойманоИсключение(пПричина);
 			}
 		});
+		обновитьDropsВЧате().catch(ЗАГЛУШКА);
 	});
 	function ПолучитьАдресЗаписиДляТекущейПозиции() {
 		if (_сАдресЗаписи === '') {

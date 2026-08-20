@@ -198,7 +198,7 @@ function ПолучитьURLРесурсаРасширения(сПуть) {
 
 function ПолучитьАдресНашегоПроигрывателя(сКодКанала) {
 	const сПараметры = '?channel=' + encodeURIComponent(сКодКанала);
-	const сАдрес = ПолучитьURLРесурсаРасширения('player.html');
+	const сАдрес = ПолучитьURLРесурсаРасширения('src/player/player.html');
 	return сАдрес ? сАдрес + сПараметры : '';
 }
 
