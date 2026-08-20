@@ -181,6 +181,16 @@
 	{
 		"message": "You are watching a previously recorded video"
 	},
+	"J0151":
+	{
+		"message": "Twitch Dark",
+		"description": "Player color theme name."
+	},
+	"J0152":
+	{
+		"message": "Twitch Light",
+		"description": "Player color theme name."
+	},
 	"J0200":
 	{
 		"message": "The browser was unable to play the video. Perhaps it allocated too much RAM."

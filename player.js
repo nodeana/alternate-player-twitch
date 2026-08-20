@@ -2120,9 +2120,17 @@ const м_Оформление = (() => {
 	}
 	function ОбновитьСтили() {
 		const оСтиль = document.documentElement.style;
+		let чЯркостьФона = 0;
 		for (let узКнопка of document.querySelectorAll(СЕЛЕКТОР_КНОПКИ_ЦВЕТА)) {
-			оСтиль.setProperty(`--${узКнопка.id}`, Number.parseInt(узКнопка.value.slice(1, 3), 16) + ',' + Number.parseInt(узКнопка.value.slice(3, 5), 16) + ',' + Number.parseInt(узКнопка.value.slice(5, 7), 16));
+			const чR = Number.parseInt(узКнопка.value.slice(1, 3), 16);
+			const чG = Number.parseInt(узКнопка.value.slice(3, 5), 16);
+			const чB = Number.parseInt(узКнопка.value.slice(5, 7), 16);
+			оСтиль.setProperty(`--${узКнопка.id}`, `${чR},${чG},${чB}`);
+			if (узКнопка.id === 'сЦветФона') {
+				чЯркостьФона = (чR * 299 + чG * 587 + чB * 114) / 1e3 / 255;
+			}
 		}
+		document.documentElement.classList.toggle('темасветлая', чЯркостьФона > .55);
 		const чНепрозрачность = Округлить(1 - м_Настройки.Получить('чПрозрачность') / 100, 2);
 		оСтиль.setProperty('--чНепрозрачность', чНепрозрачность);
 		оСтиль.setProperty('--чНепрозрачностьОкна', Ограничить(чНепрозрачность, .85, 1));
