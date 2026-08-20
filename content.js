@@ -179,6 +179,9 @@ function обработатьОтвет({target: оЗапрос}) {
 
 function запуститьНашПроигрыватель(сКодКанала) {
 	const сАдресПроигрывателя = ПолучитьАдресНашегоПроигрывателя(сКодКанала);
+	if (!сАдресПроигрывателя) {
+		return;
+	}
 	м_Журнал.Окак(`[content.js] Перехожу на страницу ${сАдресПроигрывателя}`);
 	запретитьАвтоперенаправлениеЭтойСтраницы();
 	задатьАдресСтраницы(сАдресПроигрывателя);
@@ -186,6 +189,9 @@ function запуститьНашПроигрыватель(сКодКанала
 
 function перенаправитьНаНашПроигрыватель(сКодКанала) {
 	const сАдресПроигрывателя = ПолучитьАдресНашегоПроигрывателя(сКодКанала);
+	if (!сАдресПроигрывателя) {
+		return;
+	}
 	м_Журнал.Окак(`[content.js] Меняю адрес страницы с ${location.href} на ${сАдресПроигрывателя}`);
 	document.documentElement.setAttribute('data-tw5-перенаправление', сАдресПроигрывателя);
 	задатьАдресСтраницы(сАдресПроигрывателя, true);
@@ -490,9 +496,13 @@ function вставитьСторонниеРасширения() {
 }
 
 function изменитьСтильЧата() {
+	const сАдрес = ПолучитьURLРесурсаРасширения('content.css');
+	if (!сАдрес) {
+		return;
+	}
 	const узСтиль = document.createElement('link');
 	узСтиль.rel = 'stylesheet';
-	узСтиль.href = chrome.runtime.getURL('content.css');
+	узСтиль.href = сАдрес;
 	узСтиль.className = 'tw5-js-удалить';
 	(document.head || document.documentElement).appendChild(узСтиль);
 }
@@ -527,6 +537,9 @@ function изменитьПоведениеЧата() {
 function удалитьХвостыСтаройВерсии() {}
 
 ДобавитьОбработчикИсключений(() => {
+	try {
+		sessionStorage.removeItem('tw5-reloading-extension');
+	} catch (_) {}
 	м_Журнал.Окак(`[content.js] Запущен ${performance.now().toFixed()}мс ${location.href}`);
 	if (разобратьАдрес(location).сСтраница === 'ЧАТ_КАНАЛА') {
 		// Storage hook lives in pagehook.js (MAIN world)

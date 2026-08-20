@@ -163,9 +163,43 @@ function объединитьЗапросыGql(мсТелаЗапросов) {
 	return `[${мсТелаЗапросов.join(',')}]`;
 }
 
+function КонтекстРасширенияАктивен() {
+	try {
+		return Boolean(chrome.runtime.id);
+	} catch (_) {
+		return false;
+	}
+}
+
+function ПерезагрузитьСтраницуПослеОбновленияРасширения() {
+	if (!ЭТО_CONTENT_SCRIPT || sessionStorage.getItem('tw5-reloading-extension')) {
+		return;
+	}
+	sessionStorage.setItem('tw5-reloading-extension', '1');
+	location.reload();
+}
+
+function ПолучитьURLРесурсаРасширения(сПуть) {
+	Проверить(ЭтоНепустаяСтрока(сПуть));
+	if (!КонтекстРасширенияАктивен()) {
+		ПерезагрузитьСтраницуПослеОбновленияРасширения();
+		return '';
+	}
+	try {
+		return chrome.runtime.getURL(сПуть);
+	} catch (пИсключение) {
+		if (/Extension context invalidated/i.test(String(пИсключение.message || пИсключение))) {
+			ПерезагрузитьСтраницуПослеОбновленияРасширения();
+			return '';
+		}
+		throw пИсключение;
+	}
+}
+
 function ПолучитьАдресНашегоПроигрывателя(сКодКанала) {
 	const сПараметры = '?channel=' + encodeURIComponent(сКодКанала);
-	return chrome.runtime.getURL('player.html') + сПараметры;
+	const сАдрес = ПолучитьURLРесурсаРасширения('player.html');
+	return сАдрес ? сАдрес + сПараметры : '';
 }
 
 const м_Журнал = (() => {
@@ -498,7 +532,7 @@ const м_Настройки = (() => {
 		чШиринаПанелиЧата: Настройка.СоздатьДиапазон(340, 100, МАКС_ЗНАЧЕНИЕ_НАСТРОЙКИ),
 		чВысотаПанелиЧата: Настройка.СоздатьДиапазон(250, 100, МАКС_ЗНАЧЕНИЕ_НАСТРОЙКИ),
 		лПолноценныйЧат: Настройка.Создать(true),
-		лЗатемнитьЧат: Настройка.Создать(false),
+		лЗатемнитьЧат: Настройка.Создать(true),
 		чРазмерИнтерфейса: Настройка.СоздатьДиапазон(этоМобильноеУстройство() ? 115 : 100, 50, 200),
 		чИнтервалАвтоскрытия: Настройка.СоздатьДиапазон(4, .5, 60),
 		лАнимацияИнтерфейса: Настройка.Создать(!этоМобильноеУстройство()),
@@ -536,6 +570,10 @@ const м_Настройки = (() => {
 				try {
 					if (chrome.runtime.lastError) {
 						console.error('storage.local.get', chrome.runtime.lastError.message);
+						if (/Extension context invalidated/i.test(chrome.runtime.lastError.message)) {
+							ПерезагрузитьСтраницуПослеОбновленияРасширения();
+							return;
+						}
 						м_Отладка.ЗавершитьРаботуИПоказатьСообщение('J0221');
 					}
 					м_Журнал.Вот(`[Настройки] Настройки прочитаны из хранилища: ${м_Журнал.O(оВосстановленныеНастройки)}`);
@@ -633,6 +671,10 @@ const м_Настройки = (() => {
 	function ПроверитьРезультатСохранения() {
 		if (chrome.runtime.lastError) {
 			console.error('storage.local.set', chrome.runtime.lastError.message);
+			if (/Extension context invalidated/i.test(chrome.runtime.lastError.message)) {
+				ПерезагрузитьСтраницуПослеОбновленияРасширения();
+				return;
+			}
 			м_Отладка.ЗавершитьРаботуИПоказатьСообщение('J0221');
 		}
 	}

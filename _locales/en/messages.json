@@ -868,7 +868,7 @@
 	},
 	"A0649":
 	{
-		"message": "Full-featured — identical to the popout chat on the Twitch.tv website. Whispers do not work in chat yet. If you need to toggle the dark mode, do it on the Twitch.tv website.\n\nLess features — no rooms, no moderation settings, no raids, no Bits, sometimes you need to confirm the sending of the first message. Use this version if the full-featured version does not work as it should. To enable inline moderation icons, check the “Mod Icons” option in your chat setting on the Twitch.tv website."
+		"message": "Full-featured — identical to the popout chat on the Twitch.tv website. Whispers do not work in chat yet. Dark mode is enabled with the “Full-featured; dark mode” option.\n\nLess features — no rooms, no moderation settings, no raids, no Bits, sometimes you need to confirm the sending of the first message. Use this version if the full-featured version does not work as it should. To enable inline moderation icons, check the “Mod Icons” option in your chat setting on the Twitch.tv website."
 	},
 	"F0650":
 	{
@@ -881,6 +881,10 @@
 	"F0652":
 	{
 		"message": "Less features; dark mode"
+	},
+	"F0658":
+	{
+		"message": "Full-featured; dark mode"
 	},
 	"F0653":
 	{
