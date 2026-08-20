@@ -305,6 +305,25 @@
 	{
 		"message": "Automatic reload cancelled. Reload the page manually when you are ready."
 	},
+	"J0232":
+	{
+		"message": "The chat will reload automatically in $SECONDS$ s…",
+		"placeholders":
+		{
+			"SECONDS":
+			{
+				"content": "$1"
+			}
+		}
+	},
+	"J0233":
+	{
+		"message": "Automatic chat reload cancelled. Reload the chat when you are ready."
+	},
+	"J0234":
+	{
+		"message": "The chat lost its connection. It will reload when the network is back."
+	},
 	"F0501":
 	{
 		"message": "Category:"
@@ -341,7 +360,7 @@
 	},
 	"A0509":
 	{
-		"message": "Open or close the chat. This command is available in full-screen mode.\nThe C key on the keyboard."
+		"message": "Open or close the chat. This command is available in full-screen mode.\nThe C key on the keyboard.\nRight-click or Shift+C reloads the chat without reloading the player."
 	},
 	"A0510":
 	{
@@ -1073,6 +1092,14 @@
 	"F0730":
 	{
 		"message": "The data has been rejected. Your browser is no longer supported by the extension! Please update your browser or remove the extension."
+	},
+	"F0731":
+	{
+		"message": "Reload chat"
+	},
+	"A0732":
+	{
+		"message": "Reload the chat without reloading the player. Use this if the chat froze, crashed, or lost connection.\nRight-click the chat button or press Shift+C."
 	},
 	"J0731":
 	{

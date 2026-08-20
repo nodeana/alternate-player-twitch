@@ -197,16 +197,54 @@ body {
 .анимацияинтерфейса #размерчата {
   transition: opacity 0.35s ease-out;
 }
-#размерчата:hover + #чат {
+#размерчата:hover + #чат-оболочка {
   pointer-events: none;
 }
-#чат {
+#чат-оболочка {
+  position: relative;
   min-width: 160px;
   min-height: 188px;
+  flex: 0 0 auto;
+  align-self: stretch;
+}
+#чат {
+  display: block;
+  width: 100%;
+  height: 100%;
   border: 0;
+  min-width: 0;
+  min-height: 0;
+}
+#чат-перезагрузка {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.72);
+  color: #fff;
+  text-align: center;
+  pointer-events: auto;
+}
+#чат-перезагрузка[hidden] {
+  display: none;
+}
+#чат-перезагрузка-текст {
+  margin: 0;
+  font-weight: 600;
+}
+.чат-перезагрузка-кнопки {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
 }
 .скрытьчат #размерчата,
-.скрытьчат #чат {
+.скрытьчат #чат-оболочка {
   display: none;
 }
 #размерчата {
@@ -243,12 +281,12 @@ body {
 .чатвверху #проигрывательичат {
   flex-direction: column-reverse;
 }
-.чатсправа:not(.автоположениечата) #чат,
-.чатслева:not(.автоположениечата) #чат {
+.чатсправа:not(.автоположениечата) #чат-оболочка,
+.чатслева:not(.автоположениечата) #чат-оболочка {
   height: 100%;
 }
-.чатвнизу:not(.автоположениечата) #чат,
-.чатвверху:not(.автоположениечата) #чат {
+.чатвнизу:not(.автоположениечата) #чат-оболочка,
+.чатвверху:not(.автоположениечата) #чат-оболочка {
   width: 100%;
 }
 .чатвнизу:not(.автоположениечата) #размерчата,
@@ -271,7 +309,7 @@ body {
   .автоположениечата.чатслева #проигрывательичат {
     flex-direction: row-reverse;
   }
-  .автоположениечата #чат {
+  .автоположениечата #чат-оболочка {
     height: 100%;
   }
 }
@@ -282,7 +320,7 @@ body {
   .автоположениечата.чатвверху #проигрывательичат {
     flex-direction: column-reverse;
   }
-  .автоположениечата #чат {
+  .автоположениечата #чат-оболочка {
     width: 100%;
   }
   .автоположениечата #размерчата {
