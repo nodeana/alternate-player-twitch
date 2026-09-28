@@ -202,7 +202,7 @@ body {
 }
 #чат-оболочка {
   position: relative;
-  min-width: 160px;
+  min-width: 220px;
   min-height: 188px;
   flex: 0 0 auto;
   align-self: stretch;
@@ -393,6 +393,46 @@ a:hover {
 }
 #глаз.масштабировать {
   object-fit: contain;
+}
+#кадр {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: scale-down;
+  pointer-events: none;
+  z-index: 1;
+}
+#кадр.масштабировать {
+  object-fit: contain;
+}
+#субтитры {
+  position: absolute;
+  z-index: 4;
+  left: 8%;
+  right: 8%;
+  bottom: 4.5rem;
+  text-align: center;
+  pointer-events: none;
+  color: #fff;
+  font-size: 1.25rem;
+  line-height: 1.35;
+  white-space: pre-line;
+  text-shadow: 0 0 0.2rem #000, 0 0.08rem 0.15rem #000;
+}
+#переключитьсубтитры {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+#переключитьсубтитры[aria-pressed="true"] {
+  color: rgb(var(--сЦветВыделения));
+}
+#задержка {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+  padding: 0 0.35rem;
 }
 .крутилка {
   position: absolute;

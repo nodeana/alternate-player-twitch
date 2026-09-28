@@ -141,6 +141,17 @@ a.tw5-drops-active svg {
     flex-wrap: wrap !important;
   }
 }
+@media (max-width: 18rem) {
+  html .channel-leaderboard,
+  html .community-highlight,
+  html .community-highlight-stack,
+  html .community-highlight-stack__card,
+  html .community-highlight-stack__card--wide,
+  html .chat-input div:has(.tw-callout-message),
+  html .tw-callout-message {
+    display: none !important;
+  }
+}
 @media (max-height: 33em) {
   :root {
     --tw5-высотазаголовка: 0px;

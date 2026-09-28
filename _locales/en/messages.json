@@ -33,7 +33,7 @@
 	},
 	"J0106":
 	{
-		"message": "Stop the broadcast and start watching instant replay.\nThe SPACE key on the keyboard."
+		"message": "Stop the broadcast and start watching instant replay.\nThe SPACE key on the keyboard.\nPress J or the Left arrow to jump back 10 seconds."
 	},
 	"J0107":
 	{
@@ -174,7 +174,7 @@
 	},
 	"J0149":
 	{
-		"message": "You are watching a live broadcast. Use the player menu to rewatch it.",
+		"message": "You are watching a live broadcast. Press J or the Left arrow to jump back 10 seconds, or use the player menu to rewatch it.",
 		"description": "Копия F0664"
 	},
 	"J0150":
@@ -982,6 +982,15 @@
 	{
 		"message": "Hiding ads"
 	},
+	"F0672":
+	{
+		"message": "s",
+		"description": "Единица измерения задержки на панели: секунды"
+	},
+	"A0680":
+	{
+		"message": "Subtitles. Shown when this broadcast includes a caption track."
+	},
 	"F0670":
 	{
 		"message": "Ads hidden"
@@ -1377,7 +1386,7 @@
 	},
 	"F1506":
 	{
-		"message": "<p data-image=\"svg-fail\">The following features of the Twitch.tv website are not available in the player: playback of videos, playback of encrypted broadcasts, Whispers, Twitch extensions (not to be confused with browser extensions), subtitles.</p>",
+		"message": "<p data-image=\"svg-fail\">The following features of the Twitch.tv website are not available in the player: playback of videos, playback of encrypted broadcasts, Whispers, Twitch extensions (not to be confused with browser extensions). Subtitles are shown when the broadcast includes a caption track.</p>",
 		"description": "Часть справки."
 	},
 	"F1507":

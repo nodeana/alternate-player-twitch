@@ -479,13 +479,13 @@
 			JSON.parse(sessionBody(channelID))
 		]);
 	}
-	function postThroughPage(body, headers) {
+	function postThroughPage(body, headers, url) {
 		const controller = new AbortController();
 		const timer = setTimeout(() => controller.abort(), 12000);
 		passthrough = true;
 		let promise;
 		try {
-			promise = window.fetch(GQL_URL, {
+			promise = window.fetch(url || GQL_URL, {
 				method: 'POST',
 				credentials: 'include',
 				headers,
@@ -496,6 +496,37 @@
 			passthrough = false;
 		}
 		return promise.finally(() => clearTimeout(timer));
+	}
+	function ensureIntegrity(headers) {
+		const minted = Object.create(null);
+		for (const name of ['Authorization', 'Client-ID', 'Client-Session-Id', 'Client-Version', 'X-Device-Id', 'Device-ID']) {
+			const value = headerGet(headers, name);
+			if (value) {
+				minted[name] = value;
+			}
+		}
+		if (!headerGet(minted, 'Client-ID')) {
+			minted['Client-ID'] = CLIENT_ID;
+		}
+		return postThroughPage('', minted, INTEGRITY_URL).then((response) => response.json()).then((data) => {
+			if (!data || !data.token) {
+				return false;
+			}
+			headerSet(headers, 'Client-Integrity', data.token);
+			if (!capturedGqlHeaders) {
+				capturedGqlHeaders = Object.create(null);
+			}
+			Object.assign(capturedGqlHeaders, headers);
+			const expiration = Number(data.expiration);
+			const expiresAt = Number.isFinite(expiration) ? (expiration < 1e12 ? expiration * 1000 : expiration) : Date.now() + 60 * 60 * 1000;
+			document.cookie = `tw5~gqltoken=${encodeURIComponent(JSON.stringify({
+				сТокен: data.token,
+				чПротухнетПосле: expiresAt,
+				сСессия: headerGet(headers, 'Client-Session-Id'),
+				сВерсия: headerGet(headers, 'Client-Version')
+			}))}; path=/tw5~storage/; samesite=none; secure; max-age=86400`;
+			return true;
+		}).catch(() => false);
 	}
 	function postThroughXhr(body, headers) {
 		return new Promise((resolve, reject) => {
@@ -534,23 +565,27 @@
 		}
 		headerSet(headers, 'Content-Type', 'text/plain; charset=UTF-8');
 		headerSet(headers, 'Accept-Language', 'en-US');
-		const read = (hashIndex, transport) => {
+		const read = (hashIndex, transport, refreshed) => {
 			const body = dropsBatchBody(channelID, HASH_AVAILABLE_DROPS[hashIndex]);
 			const sent = transport === 'xhr' ? postThroughXhr(body, headers) : postThroughPage(body, headers).then((response) => response.json());
 			return sent.then((results) => {
+				const first = Array.isArray(results) ? results[0] : results;
+				if (!refreshed && isIntegrityError(first)) {
+					return ensureIntegrity(headers).then(() => read(hashIndex, transport, true));
+				}
 				const described = describeBatch(results, hashIndex);
 				if (described) {
 					return described;
 				}
-				return read(hashIndex + 1, transport);
+				return read(hashIndex + 1, transport, refreshed);
 			});
 		};
-		return read(0, 'fetch').catch((error) => {
+		return ensureIntegrity(headers).then(() => read(0, 'fetch', false)).catch((error) => {
 			const message = String(error && error.message || error);
 			if (message !== 'Failed to fetch' && !/aborted/i.test(message)) {
 				return {error: message};
 			}
-			return read(0, 'xhr').catch((xhrError) => ({
+			return read(0, 'xhr', true).catch((xhrError) => ({
 				error: String(xhrError && xhrError.message || xhrError)
 			}));
 		});

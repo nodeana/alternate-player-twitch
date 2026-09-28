@@ -20,6 +20,10 @@
       <div id="проигрыватель">
         <video id="глаз" playsinline tabindex="-1">
         </video>
+        <canvas id="кадр" hidden>
+        </canvas>
+        <div id="субтитры" hidden>
+        </div>
         <svg class="крутилка" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
           <use class="svg-busy" xlink:href="#svg-busy" />
           <use class="svg-end" xlink:href="#svg-end" />
@@ -346,6 +350,8 @@
                                                                                                                                                           <input id="громкость" class="элементпанели можнотыкать" type="range" max="100" step="1" value="0" data-i18n="^A0506">
                                                                                                                                                           <div id="позиция" class="элементпанели можнотыкать метка недляповтора" data-i18n="^A0507">
                                                                                                                                                           </div>
+                                                                                                                                                          <div id="задержка" class="элементпанели метка недляповтора" hidden>
+                                                                                                                                                          </div>
                                                                                                                                                           <div class="заполнитель недляповтора">
                                                                                                                                                           </div>
                                                                                                                                                           <div class="заполнитель дляповтора">
@@ -406,6 +412,9 @@
                                                                                                                                                                                   <use xlink:href="#svg-pip-false" />
                                                                                                                                                                                   <use xlink:href="#svg-pip-true" />
                                                                                                                                                                                 </svg>
+                                                                                                                                                                              </button>
+                                                                                                                                                                              <button id="переключитьсубтитры" class="кнопка элементпанели можнотыкать" type="button" hidden data-i18n="^A0680">
+                                                                                                                                                                                CC
                                                                                                                                                                               </button>
                                                                                                                                                                               <button id="переключитьполноэкранный" class="кнопка элементпанели можнотыкать" type="button" data-i18n="^A0511">
                                                                                                                                                                                 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
