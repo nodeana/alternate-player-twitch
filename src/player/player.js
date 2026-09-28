@@ -5854,6 +5854,8 @@ const м_Twitch = (() => {
 	let _сИмяЗрителя = '';
 	let _сТокенGql = '';
 	let _чТокенGqlПротухнетПосле = 0;
+	let _сСессияGql = '';
+	let _сВерсияКлиента = '';
 	let _sPlaySessionID = '';
 	let _сИдИгры = '';
 	let _сНазваниеИгры = '';
@@ -6254,6 +6256,8 @@ const м_Twitch = (() => {
 			try {
 				const о = JSON.parse(decodeURIComponent(сПеченька));
 				Проверить(ЭтоНепустаяСтрока(о.сТокен) && Number.isSafeInteger(о.чПротухнетПосле));
+				_сСессияGql = typeof о.сСессия == 'string' ? о.сСессия : '';
+				_сВерсияКлиента = typeof о.сВерсия == 'string' ? о.сВерсия : '';
 				return [ о.сТокен, о.чПротухнетПосле ];
 			} catch (_) {
 				м_Журнал.Ой(`[Twitch] Не удалось разобрать печеньку токена GQL: ${сПеченька}`);
@@ -6522,43 +6526,69 @@ const м_Twitch = (() => {
 		}
 		return btoa(сДвоичные);
 	}
-	function запроситьДоступныеDrops() {
-		const моХеши = [
-			'782dad0f032942260171d2d80a654f88bdd0c5a9dddc392e9bc92218a0f42d20',
-			'9a62a09bce5b53e26e64a671e530bc599cb6aab1e5ba3cbd5d85966d3940716f'
-		];
-		const запросить = (сХеш) => {
-			const оТело = JSON.stringify({
-				operationName: 'DropsHighlightService_AvailableDrops',
-				variables: {
-					channelID: String(_сИдКанала)
-				},
-				extensions: {
-					persistedQuery: {
-						version: 1,
-						sha256Hash: сХеш
-					}
-				}
-			});
-			return отправитьЗапросGql(null, оТело, null, true, true, false, 'drops disponibles').then(оРезультат => {
-				const кКампаний = (цепочка(оРезультат, 'data', 'channel', 'viewerDropCampaigns') || []).length;
-				if (кКампаний > 0 || !оРезультат.errors) {
-					return оРезультат;
-				}
-				throw 'empty';
-			});
-		};
-		return запросить(моХеши[0]).catch(() => запросить(моХеши[1]));
+	function текстОшибкиGql(оРезультат) {
+		if (!оРезультат || !Array.isArray(оРезультат.errors)) {
+			return '';
+		}
+		return оРезультат.errors.map(оОшибка => оОшибка && оОшибка.message).filter(Boolean).join('; ');
 	}
-	function обновитьDropsВЧате() {
-		if (!м_Настройки.Получить('лПолноценныйЧат') || !_сИдКанала) {
-			return Promise.resolve(false);
-		}
-		const чИдВкладки = получитьТекущуюВкладку.чИдВкладки;
-		if (!Number.isSafeInteger(чИдВкладки)) {
-			return Promise.resolve(false);
-		}
-		const оЗапросСессии = JSON.stringify({
+	function запроситьGqlDrops(сТело) {
+		return new Promise((фВыполнить, фОтказаться) => {
+			const оЗапрос = new XMLHttpRequest();
+			оЗапрос.open('POST', 'https://gql.twitch.tv/gql');
+			оЗапрос.withCredentials = true;
+			оЗапрос.timeout = 15000;
+			оЗапрос.setRequestHeader('Accept-Language', 'en-US');
+			оЗапрос.setRequestHeader('Client-ID', 'kimne78kx3ncx6brgo4mv6wki5h1ko');
+			оЗапрос.setRequestHeader('Content-Type', 'text/plain; charset=UTF-8');
+			if (_сИдУстройства) {
+				оЗапрос.setRequestHeader('X-Device-ID', _сИдУстройства);
+			}
+			if (_сТокенЗрителя) {
+				оЗапрос.setRequestHeader('Authorization', `OAuth ${_сТокенЗрителя}`);
+			}
+			if (_сТокенGql) {
+				оЗапрос.setRequestHeader('Client-Integrity', _сТокенGql);
+			}
+			if (_сСессияGql) {
+				оЗапрос.setRequestHeader('Client-Session-Id', _сСессияGql);
+			}
+			if (_сВерсияКлиента) {
+				оЗапрос.setRequestHeader('Client-Version', _сВерсияКлиента);
+			}
+			оЗапрос.onload = () => {
+				try {
+					фВыполнить(JSON.parse(оЗапрос.responseText || 'null'));
+				} catch (пИсключение) {
+					фОтказаться(пИсключение);
+				}
+			};
+			оЗапрос.onerror = () => фОтказаться(new Error('Failed to fetch'));
+			оЗапрос.ontimeout = () => фОтказаться(new Error('timeout'));
+			оЗапрос.send(сТело);
+		});
+	}
+	function запроситьDropsИзПлеера() {
+		const моХеши = [ '782dad0f032942260171d2d80a654f88bdd0c5a9dddc392e9bc92218a0f42d20', '9a62a09bce5b53e26e64a671e530bc599cb6aab1e5ba3cbd5d85966d3940716f' ];
+		const запроситьДоступные = (ы) => запроситьGqlDrops(JSON.stringify({
+			operationName: 'DropsHighlightService_AvailableDrops',
+			variables: {
+				channelID: String(_сИдКанала)
+			},
+			extensions: {
+				persistedQuery: {
+					version: 1,
+					sha256Hash: моХеши[ы]
+				}
+			}
+		})).then(оРезультат => {
+			if (/persistedquerynotfound/i.test(текстОшибкиGql(оРезультат)) && ы + 1 < моХеши.length) {
+				return запроситьДоступные(ы + 1);
+			}
+			return оРезультат;
+		});
+		const оГотов = _сТокенGql !== '' ? Promise.resolve() : получитьТокенGql().catch(() => '');
+		return оГотов.then(() => Promise.all([ запроситьДоступные(0), запроситьGqlDrops(JSON.stringify({
 			operationName: 'DropCurrentSessionContext',
 			variables: {
 				channelID: String(_сИдКанала),
@@ -6570,44 +6600,101 @@ const м_Twitch = (() => {
 					sha256Hash: '4d06b702d25d652afb9ef835d2a550031f1cf762b193523a92166f40ea3d142b'
 				}
 			}
+		})) ])).then(([availResult, sessionResult]) => {
+			const error = [ текстОшибкиGql(availResult), текстОшибкиGql(sessionResult) ].filter(Boolean).join('; ');
+			const campaigns = (цепочка(availResult, 'data', 'channel', 'viewerDropCampaigns') || []).length;
+			const session = Boolean(цепочка(sessionResult, 'data', 'currentUser', 'dropCurrentSession'));
+			if (error && campaigns === 0 && !session) {
+				return {
+					error,
+					availResult,
+					sessionResult
+				};
+			}
+			return {
+				availResult,
+				sessionResult
+			};
 		});
-		return Promise.all([
-			запроситьДоступныеDrops().catch(пПричина => {
-				console.warn('[tw5-drops] AvailableDrops query failed:', пПричина);
-				return null;
-			}),
-			отправитьЗапросGql(null, оЗапросСессии, null, true, true, false, 'сессия drops').catch(пПричина => {
-				console.warn('[tw5-drops] DropCurrentSession query failed:', пПричина);
-				return null;
-			})
-		]).then(([оДоступные, оСессия]) => {
-			const кКампаний = (цепочка(оДоступные, 'data', 'channel', 'viewerDropCampaigns') || []).length;
-			const лСессия = Boolean(цепочка(оСессия, 'data', 'currentUser', 'dropCurrentSession'));
+	}
+	function послатьКэшDrops(чИдВкладки, оРезультат) {
+		return new Promise(фВыполнить => {
+			chrome.tabs.sendMessage(чИдВкладки, {
+				сЗапрос: 'update-drops-cache',
+				availResult: оРезультат.availResult,
+				sessionResult: оРезультат.sessionResult
+			}, () => {
+				if (!chrome.runtime.lastError) {
+					фВыполнить();
+					return;
+				}
+				chrome.runtime.sendMessage({
+					request: 'update-drops-cache',
+					tabId: чИдВкладки,
+					availResult: оРезультат.availResult,
+					sessionResult: оРезультат.sessionResult
+				}, () => {
+					void chrome.runtime.lastError;
+					фВыполнить();
+				});
+			});
+		});
+	}
+	function обновитьDropsВЧате() {
+		if (!м_Настройки.Получить('лПолноценныйЧат') || !_сИдКанала) {
+			return Promise.resolve(false);
+		}
+		const чИдВкладки = получитьТекущуюВкладку.чИдВкладки;
+		if (!Number.isSafeInteger(чИдВкладки)) {
+			return Promise.resolve(false);
+		}
+		const оЗапрос = {
+			channelID: String(_сИдКанала),
+			channelLogin: _сКодКанала || '',
+			authToken: _сТокенЗрителя || '',
+			deviceId: _сИдУстройства || ''
+		};
+		const сообщить = (оОтвет) => {
+			if (!оОтвет || оОтвет.error) {
+				console.warn('[tw5-drops] chat query failed:', оОтвет && оОтвет.error || 'empty');
+				м_Журнал.Ой(`[Twitch] Drops в чате не обновлены. ${оОтвет && оОтвет.error || 'empty'}`);
+				return false;
+			}
+			const кКампаний = (цепочка(оОтвет.availResult, 'data', 'channel', 'viewerDropCampaigns') || []).length;
+			const лСессия = Boolean(цепочка(оОтвет.sessionResult, 'data', 'currentUser', 'dropCurrentSession'));
 			console.info(`[tw5-drops] player: campaigns=${кКампаний} session=${лСессия}`);
 			м_Журнал.Вот(`[Twitch] Drops в чате: кампаний=${кКампаний} сессия=${лСессия}`);
-			return new Promise((фВыполнить, фОтказаться) => {
-				chrome.tabs.sendMessage(чИдВкладки, {
-					сЗапрос: 'update-drops-cache',
-					availResult: оДоступные,
-					sessionResult: оСессия
-				}, () => {
-					if (!chrome.runtime.lastError) {
-						фВыполнить(кКампаний > 0 || лСессия);
+			return кКампаний > 0 || лСессия;
+		};
+		const запроситьУЧата = () => new Promise((фВыполнить, фОтказаться) => {
+			chrome.tabs.sendMessage(чИдВкладки, Object.assign({
+				сЗапрос: 'fetch-drops'
+			}, оЗапрос), оОтвет => {
+				if (!chrome.runtime.lastError) {
+					фВыполнить(оОтвет);
+					return;
+				}
+				chrome.runtime.sendMessage(Object.assign({
+					request: 'fetch-drops',
+					tabId: чИдВкладки
+				}, оЗапрос), оОтветФона => {
+					if (chrome.runtime.lastError) {
+						фОтказаться(chrome.runtime.lastError.message);
 						return;
 					}
-					chrome.runtime.sendMessage({
-						request: 'update-drops-cache',
-						tabId: чИдВкладки,
-						availResult: оДоступные,
-						sessionResult: оСессия
-					}, () => {
-						if (chrome.runtime.lastError) {
-							фОтказаться(chrome.runtime.lastError.message);
-							return;
-						}
-						фВыполнить(кКампаний > 0 || лСессия);
-					});
+					фВыполнить(оОтветФона);
 				});
+			});
+		});
+		return запроситьУЧата().then(оОтвет => {
+			if (оОтвет && !оОтвет.error) {
+				return сообщить(оОтвет);
+			}
+			return запроситьDropsИзПлеера().then(оЛокальный => {
+				if (оЛокальный && !оЛокальный.error) {
+					return послатьКэшDrops(чИдВкладки, оЛокальный).then(() => сообщить(оЛокальный));
+				}
+				return сообщить(оЛокальный || оОтвет);
 			});
 		});
 	}

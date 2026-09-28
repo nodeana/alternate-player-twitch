@@ -579,6 +579,38 @@ function удалитьХвостыСтаройВерсии() {}
 				фОтветить({status: 'sent'});
 				return true;
 			}
+			if (оСообщение.сЗапрос === 'fetch-drops') {
+				const requestId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+				let завершено = false;
+				const завершить = (оРезультат) => {
+					if (завершено) {
+						return;
+					}
+					завершено = true;
+					document.removeEventListener('tw5-drops-fetch-result', обработатьРезультат);
+					фОтветить(оРезультат);
+				};
+				const обработатьРезультат = (оСобытие) => {
+					const оДетали = оСобытие && оСобытие.detail;
+					if (!оДетали || оДетали.requestId !== requestId) {
+						return;
+					}
+					завершить(оДетали);
+				};
+				document.addEventListener('tw5-drops-fetch-result', обработатьРезультат);
+				document.dispatchEvent(new CustomEvent('tw5-drops-fetch', {
+					bubbles: true,
+					detail: {
+						requestId,
+						channelID: оСообщение.channelID,
+						channelLogin: оСообщение.channelLogin || '',
+						authToken: оСообщение.authToken || '',
+						deviceId: оСообщение.deviceId || ''
+					}
+				}));
+				setTimeout(() => завершить({error: 'timeout'}), 3e4);
+				return true;
+			}
 			if (оСообщение.сЗапрос === 'update-drops-cache') {
 				const оДетали = {
 					availResult: оСообщение.availResult,

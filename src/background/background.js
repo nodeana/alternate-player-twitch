@@ -54,6 +54,24 @@ async function sendMinuteWatchedViaChatFrame(tabId, url, body) {
 	}, [url, body]);
 }
 
+async function fetchDropsInChatFrame(tabId, detail) {
+	if (!chatFrame || chatFrame.tabId !== tabId) {
+		throw new Error('Chat frame not ready');
+	}
+	const [injected] = await chrome.scripting.executeScript({
+		target: {tabId, frameIds: [chatFrame.frameId]},
+		world: 'MAIN',
+		func: (payload) => {
+			if (typeof window.__tw5_fetch_drops__ !== 'function') {
+				return {error: 'drops patch missing'};
+			}
+			return window.__tw5_fetch_drops__(payload);
+		},
+		args: [detail]
+	});
+	return injected ? injected.result : {error: 'no result'};
+}
+
 async function updateDropsCacheInChatFrame(tabId, availResult, sessionResult) {
 	await runInChatMainWorld(tabId, (avail, session) => {
 		document.dispatchEvent(new CustomEvent('tw5-drops-cache-update', {
@@ -69,6 +87,21 @@ async function updateDropsCacheInChatFrame(tabId, availResult, sessionResult) {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	if (!message) {
 		return false;
+	}
+	if (message.request === 'fetch-drops') {
+		const tabId = message.tabId ?? sender.tab?.id;
+		if (!Number.isInteger(tabId)) {
+			sendResponse({error: 'No tab.'});
+			return false;
+		}
+		fetchDropsInChatFrame(tabId, {
+			channelID: message.channelID,
+			channelLogin: message.channelLogin || '',
+			authToken: message.authToken || '',
+			deviceId: message.deviceId || ''
+		}).then((result) => sendResponse(result || {error: 'empty'}))
+			.catch((error) => sendResponse({error: String(error && error.message || error)}));
+		return true;
 	}
 	if (message.request === 'update-drops-cache') {
 		const tabId = message.tabId ?? sender.tab?.id;
