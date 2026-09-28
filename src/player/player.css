@@ -756,6 +756,28 @@ th.канал-аватар {
 .канал-ссылка[title]:not(:hover) {
   text-decoration-style: dotted;
 }
+.канал-статы {
+  display: flex;
+  gap: 0.5em;
+  margin-top: 0.15em;
+}
+.канал-статы > a {
+  flex: 1 1 0;
+  box-sizing: border-box;
+  border-radius: 0.125rem;
+  padding: 0 0.5em;
+  height: 3.217ex;
+  font: 400 0.75rem/3.217ex Arial, Helvetica, sans-serif;
+  text-align: center;
+  text-decoration: none;
+  text-shadow: none;
+  white-space: nowrap;
+  color: #111;
+  background: linear-gradient(to bottom, #fff, #f2f2f2 40%, #e0e0e0 60%, #b3b3b3);
+}
+.канал-статы > a:active {
+  background: linear-gradient(to bottom, #b3b3b3, #d9d9d9 40%, #e6e6e6);
+}
 #зритель-подписаться,
 #зритель-отписаться {
   min-width: 100%;

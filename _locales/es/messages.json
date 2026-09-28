@@ -762,6 +762,18 @@
 	"A0680": {
 		"message": "Subtítulos. Se muestran si la transmisión incluye una pista de subtítulos."
 	},
+	"F0681": {
+		"message": "TwitchTracker"
+	},
+	"A0682": {
+		"message": "Abrir este canal en TwitchTracker."
+	},
+	"F0683": {
+		"message": "Streams Charts"
+	},
+	"A0684": {
+		"message": "Abrir este canal en Streams Charts."
+	},
 	"F0670": {
 		"message": "Anuncios ocultos"
 	},

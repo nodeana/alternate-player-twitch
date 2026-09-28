@@ -995,6 +995,22 @@
 	{
 		"message": "Subtitles. Shown when this broadcast includes a caption track."
 	},
+	"F0681":
+	{
+		"message": "TwitchTracker"
+	},
+	"A0682":
+	{
+		"message": "Open this channel on TwitchTracker."
+	},
+	"F0683":
+	{
+		"message": "Streams Charts"
+	},
+	"A0684":
+	{
+		"message": "Open this channel on Streams Charts."
+	},
 	"F0670":
 	{
 		"message": "Ads hidden"

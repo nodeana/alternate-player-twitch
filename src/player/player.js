@@ -3157,6 +3157,7 @@ const м_Управление = (() => {
 	}
 	function Запустить() {
 		Проверить(_чСостояние === void 0);
+		задатьСсылкиСтатистикиКанала(new URLSearchParams(location.search.slice(1)).get('channel') || '');
 		Узел('названиетрансляции').href = м_Twitch.ПолучитьАдресКанала(true);
 		const узГромкость = Узел('громкость');
 		узГромкость.min = МИНИМАЛЬНАЯ_ГРОМКОСТЬ;
@@ -3268,7 +3269,18 @@ const м_Управление = (() => {
 		Проверить(_чСостояние !== void 0);
 		return _чСостояние;
 	}
+	function задатьСсылкиСтатистикиКанала(сКод) {
+		if (!ЭтоНепустаяСтрока(сКод)) {
+			return;
+		}
+		const сЛогин = encodeURIComponent(сКод.toLowerCase());
+		Узел('канал-twitchtracker').href = `https://twitchtracker.com/${сЛогин}`;
+		Узел('канал-streamscharts').href = `https://streamscharts.com/channels/${сЛогин}`;
+	}
 	function ПоказатьМетаданныеКанала(оМетаданные) {
+		if (оМетаданные.сКод !== void 0) {
+			задатьСсылкиСтатистикиКанала(оМетаданные.сКод);
+		}
 		if (оМетаданные.сИмя !== void 0) {
 			ИзменитьЗаголовокДокумента(`${оМетаданные.сИмя} - Alternate Player for Twitch.tv`);
 			Узел('канал-имя').textContent = оМетаданные.сИмя;
@@ -6594,6 +6606,7 @@ const м_Twitch = (() => {
 			}
 			const чПодписка = !цепочка(oUser.self, 'canFollow') ? ПОДПИСКА_НЕДОСТУПНА : !oUser.self.follower ? ПОДПИСКА_НЕОФОРМЛЕНА : oUser.self.follower.disableNotifications ? ПОДПИСКА_НЕУВЕДОМЛЯТЬ : ПОДПИСКА_УВЕДОМЛЯТЬ;
 			м_События.ПослатьСобытие('twitch-полученыметаданныеканала', {
+				сКод: _сКодКанала,
 				сИмя: oUser.displayName || _сКодКанала,
 				сАватар: oUser.profileImageURL || 'player.svg#svg-missingavatar',
 				сОписание: oUser.description,
@@ -6610,6 +6623,7 @@ const м_Twitch = (() => {
 			if (typeof пПричина == 'string') {
 				м_Журнал.Ой(`[Twitch] Не удалось получить метаданные канала. ${пПричина}`);
 				м_События.ПослатьСобытие('twitch-полученыметаданныеканала', {
+					сКод: _сКодКанала,
 					сИмя: _сКодКанала,
 					сАватар: 'player.svg#svg-missingavatar',
 					сКодЯзыка: null,

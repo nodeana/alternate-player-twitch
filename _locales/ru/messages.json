@@ -994,6 +994,22 @@
 	{
 		"message": "Субтитры. Показываются, если у трансляции есть дорожка субтитров."
 	},
+	"F0681":
+	{
+		"message": "TwitchTracker"
+	},
+	"A0682":
+	{
+		"message": "Открыть этот канал на TwitchTracker."
+	},
+	"F0683":
+	{
+		"message": "Streams Charts"
+	},
+	"A0684":
+	{
+		"message": "Открыть этот канал на Streams Charts."
+	},
 	"F0670":
 	{
 		"message": "Скрыто рекламы"
