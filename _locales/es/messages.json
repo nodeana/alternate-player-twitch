@@ -329,11 +329,11 @@
 		"message": "¿Encontraste un fallo en Alternate Player for Twitch.tv? ¿Tienes ideas para mejorarlo? Envía tus comentarios a quien desarrolla la extensión."
 	},
 	"F0530": {
-		"message": "Apoyar",
+		"message": "Donar al creador original",
 		"description": "Копия F1000."
 	},
 	"A0531": {
-		"message": "Si te gusta Alternate Player for Twitch.tv, puedes agradecérselo a quien lo desarrolla con una donación. También es una motivación para seguir con la extensión."
+		"message": "Desarrollado por Alexander Choporov (CoolCmd) y modificado por Nodeana. Este enlace es para donar a su creador original."
 	},
 	"A0532": {
 		"message": "Arrastra para cambiar el tamaño del chat.\nOtras opciones del chat están en los ajustes del reproductor."
@@ -752,6 +752,9 @@
 	"F0669": {
 		"message": "Ocultando anuncios"
 	},
+	"F0673": {
+		"message": "Ocultando anuncios (proxy)"
+	},
 	"F0672": {
 		"message": "s",
 		"description": "Единица измерения задержки на панели: секунды"
@@ -854,11 +857,11 @@
 		"message": "Ver esta transmisión en el sitio Twitch.tv"
 	},
 	"F1000": {
-		"message": "<p>La extensión <cite>Alternate Player for Twitch.tv</cite> la creó de forma independiente <cite>Alexander Choporov (CoolCmd)</cite>, y lleva mucho tiempo libre. La extensión es gratuita. Si te gusta, puedes agradecérselo con una donación. También motiva a seguir desarrollándola.</p><p>Para donar, haz clic en <a href='https://coolcmd.github.io/tw5/donate.html' target='_blank' rel='noopener noreferrer'>este enlace</a>.</p>",
+		"message": "<p>La extensión <cite>Alternate Player for Twitch.tv</cite> la creó de forma independiente <cite>Alexander Choporov (CoolCmd)</cite> y está modificada por <cite>Nodeana</cite>. La extensión es gratuita. Si te gusta, puedes agradecérselo a su creador original con una donación.</p><p>Para donar a su creador original, haz clic en <a href='https://coolcmd.github.io/tw5/donate.html' target='_blank' rel='noopener noreferrer'>este enlace</a>.</p>",
 		"description": "Новость."
 	},
 	"J1003": {
-		"message": "¡Apoya el proyecto!",
+		"message": "Donar al creador original",
 		"description": "Заголовок новости."
 	},
 	"J1010": {

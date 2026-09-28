@@ -20,6 +20,68 @@ chrome.runtime.onInstalled.addListener((details) => {
 
 let chatFrame = null;
 
+const AD_PROXY = {
+	host: '5.22.223.111',
+	port: 7777,
+	username: 'nodeana',
+	password: 'blocktwitchads'
+};
+let adProxyOn = false;
+
+function adProxyPac(includeGql) {
+	const gql = includeGql ? 'host==="gql.twitch.tv"||' : '';
+	return `function FindProxyForURL(url,host){if(${gql}host==="usher.ttvnw.net"||shExpMatch(host,"*.playlist.ttvnw.net")||shExpMatch(host,"*.playlist.live-video.net")||(shExpMatch(host,"video-weaver.*.hls.ttvnw.net")&&shExpMatch(url,"*.m3u8*")))return "PROXY ${AD_PROXY.host}:${AD_PROXY.port}";return "DIRECT";}`;
+}
+
+function setAdProxy(enabled, includeGql) {
+	return new Promise((resolve) => {
+		if (!chrome.proxy || !chrome.proxy.settings) {
+			resolve({ok: false});
+			return;
+		}
+		if (!enabled) {
+			adProxyOn = false;
+			chrome.proxy.settings.clear({scope: 'regular'}, () => {
+				resolve({ok: !chrome.runtime.lastError});
+			});
+			return;
+		}
+		adProxyOn = true;
+		chrome.proxy.settings.set({
+			value: {
+				mode: 'pac_script',
+				pacScript: {data: adProxyPac(includeGql)}
+			},
+			scope: 'regular'
+		}, () => {
+			if (chrome.runtime.lastError) {
+				adProxyOn = false;
+				resolve({ok: false, error: chrome.runtime.lastError.message});
+				return;
+			}
+			resolve({ok: true});
+		});
+	});
+}
+
+if (chrome.webRequest && chrome.webRequest.onAuthRequired) {
+	chrome.webRequest.onAuthRequired.addListener((details, callback) => {
+		const challenger = details.challenger || {};
+		if (adProxyOn && (details.isProxy || challenger.host === AD_PROXY.host)) {
+			callback({
+				authCredentials: {
+					username: AD_PROXY.username,
+					password: AD_PROXY.password
+				}
+			});
+			return;
+		}
+		callback();
+	}, {
+		urls: ['*://*.ttvnw.net/*', '*://*.live-video.net/*', '*://gql.twitch.tv/*']
+	}, ['asyncBlocking']);
+}
+
 async function runInChatMainWorld(tabId, func, args) {
 	if (!Number.isInteger(tabId)) {
 		throw new Error('No tab');
@@ -87,6 +149,12 @@ async function updateDropsCacheInChatFrame(tabId, availResult, sessionResult) {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	if (!message) {
 		return false;
+	}
+	if (message.request === 'ad-proxy') {
+		setAdProxy(Boolean(message.enabled), Boolean(message.includeGql))
+			.then((result) => sendResponse(result))
+			.catch(() => sendResponse({ok: false}));
+		return true;
 	}
 	if (message.request === 'fetch-drops') {
 		const tabId = message.tabId ?? sender.tab?.id;
