@@ -1,158 +1,116 @@
 {
-	"manifest_version": 3,
-	"minimum_chrome_version": "102",
-	"name": "Alternate Player for Twitch.tv",
-	"short_name": "Alternate Player",
-	"version": "2026.9.29",
-	"description": "__MSG_M0001__",
-	"icons": {
-		"128": "assets/icon.png"
-	},
-	"author": "Alexander Choporov (CoolCmd), modified by Nodeana",
-	"default_locale": "en",
-	"incognito": "split",
-	"permissions": [
-		"activeTab",
-		"scripting",
-		"storage",
-		"cookies",
-		"declarativeNetRequest",
-		"proxy",
-		"webRequest",
-		"webRequestAuthProvider",
-		"management",
-		"system.memory",
-		"system.cpu"
-	],
-	"host_permissions": [
-		"*://*.twitch.tv/*",
-		"*://*.twitchcdn.net/*",
-		"*://*.ttvnw.net/*",
-		"*://*.jtvnw.net/*",
-		"*://*.live-video.net/*",
-		"*://*.akamaized.net/*",
-		"*://*.cloudfront.net/*",
-		"*://*.betterttv.net/*",
-		"*://*.frankerfacez.com/*"
-	],
-	"web_accessible_resources": [
-		{
-			"resources": ["src/player/player.html", "src/content/content.css"],
-			"matches": ["https://www.twitch.tv/*", "https://m.twitch.tv/*"]
-		}
-	],
-	"background": {
-		"service_worker": "src/background/background.js"
-	},
-	"content_scripts": [
-		{
-			"matches": [
-				"https://www.twitch.tv/*"
-			],
-			"exclude_matches": [
-				"https://www.twitch.tv/popout/"
-			],
-			"js": [
-				"src/content/autoclaim.js"
-			],
-			"all_frames": true,
-			"run_at": "document_idle"
-		},
-		{
-			"matches": [
-				"https://www.twitch.tv/popout/*/chat*"
-			],
-			"js": [
-				"src/content/autoclaim.js"
-			],
-			"all_frames": true,
-			"run_at": "document_idle"
-		},
-		{
-			"matches": [
-				"https://www.twitch.tv/popout/*/chat*"
-			],
-			"js": [
-				"src/content/dropspatch.js"
-			],
-			"all_frames": true,
-			"run_at": "document_start",
-			"world": "MAIN"
-		},
-		{
-			"matches": [
-				"https://www.twitch.tv/embed/*/chat*"
-			],
-			"js": [
-				"src/content/dropspatch.js"
-			],
-			"all_frames": true,
-			"run_at": "document_start",
-			"world": "MAIN"
-		},
-		{
-			"matches": [
-				"https://www.twitch.tv/*"
-			],
-			"js": [
-				"src/content/gqltoken.js"
-			],
-			"all_frames": true,
-			"run_at": "document_start",
-			"world": "MAIN"
-		},
-		{
-			"matches": [
-				"https://www.twitch.tv/*",
-				"https://m.twitch.tv/*"
-			],
-			"exclude_matches": [
-				"https://www.twitch.tv/popout/"
-			],
-			"js": [
-				"src/content/pagehook.js"
-			],
-			"all_frames": true,
-			"run_at": "document_start",
-			"world": "MAIN"
-		},
-		{
-			"matches": [
-				"https://www.twitch.tv/*",
-				"https://m.twitch.tv/*"
-			],
-			"exclude_matches": [
-				"https://www.twitch.tv/popout/"
-			],
-			"js": [
-				"src/shared/common.js",
-				"src/content/content.js"
-			],
-			"all_frames": true,
-			"run_at": "document_start"
-		},
-		{
-			"matches": [
-				"https://www.twitch.tv/popout/*/chat*"
-			],
-			"js": [
-				"src/shared/common.js",
-				"src/content/content.js"
-			],
-			"all_frames": true,
-			"run_at": "document_start"
-		}
-	],
-	"declarative_net_request": {
-		"rule_resources": [
-			{
-				"id": "ruleset_1",
-				"enabled": true,
-				"path": "src/rules.json"
-			}
-		]
-	},
-	"content_security_policy": {
-		"extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
-	}
+  "manifest_version": 3,
+  "minimum_chrome_version": "102",
+  "name": "Alternate Player for Twitch.tv",
+  "short_name": "Alternate Player",
+  "version": "2026.9.29",
+  "description": "__MSG_M0001__",
+  "icons": {
+    "128": "assets/icon.png"
+  },
+  "author": "Alexander Choporov (CoolCmd), modified by Nodeana",
+  "default_locale": "en",
+  "incognito": "split",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "cookies",
+    "declarativeNetRequest",
+    "proxy",
+    "webRequest",
+    "webRequestAuthProvider",
+    "management",
+    "system.memory",
+    "system.cpu"
+  ],
+  "host_permissions": [
+    "*://*.twitch.tv/*",
+    "*://*.twitchcdn.net/*",
+    "*://*.ttvnw.net/*",
+    "*://*.jtvnw.net/*",
+    "*://*.live-video.net/*",
+    "*://*.akamaized.net/*",
+    "*://*.cloudfront.net/*",
+    "*://*.betterttv.net/*",
+    "*://*.frankerfacez.com/*"
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["src/player/player.html", "src/content/content.css"],
+      "matches": ["https://www.twitch.tv/*", "https://m.twitch.tv/*"]
+    }
+  ],
+  "background": {
+    "service_worker": "src/background/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.twitch.tv/*"],
+      "exclude_matches": ["https://www.twitch.tv/popout/"],
+      "js": ["src/content/autoclaim.js"],
+      "all_frames": true,
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://www.twitch.tv/popout/*/chat*"],
+      "js": ["src/content/autoclaim.js"],
+      "all_frames": true,
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://www.twitch.tv/popout/*/chat*"],
+      "js": ["src/content/dropspatch.js"],
+      "all_frames": true,
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": ["https://www.twitch.tv/embed/*/chat*"],
+      "js": ["src/content/dropspatch.js"],
+      "all_frames": true,
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": ["https://www.twitch.tv/*"],
+      "js": ["src/content/gqltoken.js"],
+      "all_frames": true,
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": ["https://www.twitch.tv/*", "https://m.twitch.tv/*"],
+      "exclude_matches": ["https://www.twitch.tv/popout/"],
+      "js": ["src/content/pagehook.js"],
+      "all_frames": true,
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": ["https://www.twitch.tv/*", "https://m.twitch.tv/*"],
+      "exclude_matches": ["https://www.twitch.tv/popout/"],
+      "js": ["src/shared/common.js", "src/content/content.js"],
+      "all_frames": true,
+      "run_at": "document_start"
+    },
+    {
+      "matches": ["https://www.twitch.tv/popout/*/chat*"],
+      "js": ["src/shared/common.js", "src/content/content.js"],
+      "all_frames": true,
+      "run_at": "document_start"
+    }
+  ],
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "ruleset_1",
+        "enabled": true,
+        "path": "src/rules.json"
+      }
+    ]
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
+  }
 }

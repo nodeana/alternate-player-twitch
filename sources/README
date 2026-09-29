@@ -1,3 +1,4 @@
 To build wasm.wasm file:
+
 1. Download "The WebAssembly Binary Toolkit" from https://github.com/WebAssembly/wabt/releases
 2. Run "wat2wasm wasm.wat --output ../src/player/wasm.wasm"

@@ -41,17 +41,16 @@ When you visit a Twitch channel page, the extension detects whether the channel 
 
 `manifest.json` and `_locales/` stay at the repository root (Chrome requires that). The rest is grouped by role:
 
-| Path | Purpose |
-|---|---|
-| `src/background/` | MV3 service worker (BTTV/FFZ injection, watch events) |
-| `src/content/` | Scripts and CSS injected on twitch.tv |
-| `src/shared/` | Shared utilities used by the player page and content scripts |
-| `src/player/` | Player page, HLS worker, WASM, and player UI assets |
-| `src/rules.json` | declarativeNetRequest rules |
-| `assets/` | Extension icon |
-| `vendor/` | Unused local BTTV/FFZ bundles (injection uses the CDN) |
-| `sources/` | WASM text source (`wasm.wat`) |
-| `docs/` | Extra notes |
+| Path              | Purpose                                                      |
+| ----------------- | ------------------------------------------------------------ |
+| `src/background/` | MV3 service worker (BTTV/FFZ injection, watch events)        |
+| `src/content/`    | Scripts and CSS injected on twitch.tv                        |
+| `src/shared/`     | Shared utilities used by the player page and content scripts |
+| `src/player/`     | Player page, HLS worker, WASM, and player UI assets          |
+| `src/rules.json`  | declarativeNetRequest rules                                  |
+| `assets/`         | Extension icon                                               |
+| `sources/`        | WASM text source (`wasm.wat`)                                |
+| `docs/`           | Extra notes                                                  |
 
 ## Notes
 

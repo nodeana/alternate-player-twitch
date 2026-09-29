@@ -1,4 +1,4 @@
-import fs from 'fs';
+import fs from "fs";
 
 const DICT_TEXT = `
 а a
@@ -1655,210 +1655,294 @@ url url
 `;
 
 const dict = new Map();
-for (const line of DICT_TEXT.split('\n')) {
-	const trimmed = line.trim();
-	if (!trimmed || trimmed.startsWith('#')) continue;
-	const space = trimmed.indexOf(' ');
-	if (space < 1) continue;
-	dict.set(trimmed.slice(0, space).toLowerCase().replaceAll('ё', 'е'), trimmed.slice(space + 1));
+for (const line of DICT_TEXT.split("\n")) {
+  const trimmed = line.trim();
+  if (!trimmed || trimmed.startsWith("#")) continue;
+  const space = trimmed.indexOf(" ");
+  if (space < 1) continue;
+  dict.set(
+    trimmed.slice(0, space).toLowerCase().replaceAll("ё", "е"),
+    trimmed.slice(space + 1),
+  );
 }
 
-const ENDINGS = ['иями', 'остями', 'ениями', 'ость', 'ение', 'ения', 'ами', 'ями', 'ого', 'ему', 'ому', 'ыми', 'ими', 'ах', 'ях', 'ов', 'ев', 'ей', 'ий', 'ый', 'ой', 'ая', 'ое', 'ее', 'ые', 'ие', 'ам', 'ям', 'ом', 'ем', 'ую', 'ию', 'ия', 'ья', 'ью', 'а', 'я', 'у', 'ю', 'ы', 'и', 'е', 'о', 'ь'];
+const ENDINGS = [
+  "иями",
+  "остями",
+  "ениями",
+  "ость",
+  "ение",
+  "ения",
+  "ами",
+  "ями",
+  "ого",
+  "ему",
+  "ому",
+  "ыми",
+  "ими",
+  "ах",
+  "ях",
+  "ов",
+  "ев",
+  "ей",
+  "ий",
+  "ый",
+  "ой",
+  "ая",
+  "ое",
+  "ее",
+  "ые",
+  "ие",
+  "ам",
+  "ям",
+  "ом",
+  "ем",
+  "ую",
+  "ию",
+  "ия",
+  "ья",
+  "ью",
+  "а",
+  "я",
+  "у",
+  "ю",
+  "ы",
+  "и",
+  "е",
+  "о",
+  "ь",
+];
 
 function lookupWord(raw) {
-	const word = raw.toLowerCase().replaceAll('ё', 'е');
-	if (dict.has(word)) return dict.get(word);
-	for (const end of ENDINGS) {
-		if (word.length - end.length < 3 || !word.endsWith(end)) continue;
-		const stem = word.slice(0, -end.length);
-		for (const extra of ['', 'а', 'я', 'ь', 'й', 'е', 'о', 'и']) {
-			if (dict.has(stem + extra)) return dict.get(stem + extra);
-		}
-	}
-	return null;
+  const word = raw.toLowerCase().replaceAll("ё", "е");
+  if (dict.has(word)) return dict.get(word);
+  for (const end of ENDINGS) {
+    if (word.length - end.length < 3 || !word.endsWith(end)) continue;
+    const stem = word.slice(0, -end.length);
+    for (const extra of ["", "а", "я", "ь", "й", "е", "о", "и"]) {
+      if (dict.has(stem + extra)) return dict.get(stem + extra);
+    }
+  }
+  return null;
 }
 
 const dictWords = [...dict.keys()].sort((a, b) => b.length - a.length);
 
 function greedySplit(lower) {
-	const parts = [];
-	let i = 0;
-	while (i < lower.length) {
-		let found = null;
-		for (const word of dictWords) {
-			if (word.length >= 2 && lower.startsWith(word, i)) {
-				found = word;
-				break;
-			}
-		}
-		if (!found) return null;
-		parts.push(found);
-		i += found.length;
-	}
-	return parts;
+  const parts = [];
+  let i = 0;
+  while (i < lower.length) {
+    let found = null;
+    for (const word of dictWords) {
+      if (word.length >= 2 && lower.startsWith(word, i)) {
+        found = word;
+        break;
+      }
+    }
+    if (!found) return null;
+    parts.push(found);
+    i += found.length;
+  }
+  return parts;
 }
 
 function cap(word) {
-	if (!word) return word;
-	return word[0].toUpperCase() + word.slice(1);
+  if (!word) return word;
+  return word[0].toUpperCase() + word.slice(1);
 }
 
 function meaning(word, index) {
-	const lower = word.toLowerCase().replaceAll('ё', 'е');
-	if (lower === 'к') return index === 0 ? 'count' : 'to';
-	if (lower === 'и') return 'and';
-	if (lower === 'в') return 'in';
-	if (lower === 'у') return 'at';
-	if (lower === 'с' && index > 0) return 'with';
-	return lookupWord(lower);
+  const lower = word.toLowerCase().replaceAll("ё", "е");
+  if (lower === "к") return index === 0 ? "count" : "to";
+  if (lower === "и") return "and";
+  if (lower === "в") return "in";
+  if (lower === "у") return "at";
+  if (lower === "с" && index > 0) return "with";
+  return lookupWord(lower);
 }
 
 function splitRuns(text) {
-	return text.split(/(?<=[А-Яа-яЁё])(?=[^А-Яа-яЁё])|(?<=[^А-Яа-яЁё])(?=[А-Яа-яЁё])|(?<=[а-яё])(?=[А-ЯЁ])|(?<=[А-ЯЁ])(?=[А-ЯЁ][а-яё])/u).filter(Boolean);
+  return text
+    .split(
+      /(?<=[А-Яа-яЁё])(?=[^А-Яа-яЁё])|(?<=[^А-Яа-яЁё])(?=[А-Яа-яЁё])|(?<=[а-яё])(?=[А-ЯЁ])|(?<=[А-ЯЁ])(?=[А-ЯЁ][а-яё])/u,
+    )
+    .filter(Boolean);
 }
 
 function translateSegment(segment) {
-	if (!/[А-Яа-яЁё]/.test(segment)) return segment;
-	if (segment === segment.toUpperCase()) {
-		const parts = greedySplit(segment.toLowerCase().replaceAll('ё', 'е')) || [segment.toLowerCase()];
-		return parts.map((part, index) => (meaning(part, index) || part).toUpperCase()).join('');
-	}
-	const runs = splitRuns(segment);
-	let out = '';
-	let wordIndex = 0;
-	for (const run of runs) {
-		if (!/[А-Яа-яЁё]/.test(run)) {
-			out += run;
-			continue;
-		}
-		const lower = run.toLowerCase().replaceAll('ё', 'е');
-		const parts = meaning(lower, wordIndex) ? [lower] : (greedySplit(lower) || [lower]);
-		for (let partIndex = 0; partIndex < parts.length; ++partIndex) {
-			const en = meaning(parts[partIndex], wordIndex) || parts[partIndex];
-			const upper = partIndex > 0 || /[А-ЯЁ]/.test(run[0]);
-			out += wordIndex === 0 && !upper ? en[0].toLowerCase() + en.slice(1) : cap(en);
-			wordIndex++;
-		}
-	}
-	return out;
+  if (!/[А-Яа-яЁё]/.test(segment)) return segment;
+  if (segment === segment.toUpperCase()) {
+    const parts = greedySplit(segment.toLowerCase().replaceAll("ё", "е")) || [
+      segment.toLowerCase(),
+    ];
+    return parts
+      .map((part, index) => (meaning(part, index) || part).toUpperCase())
+      .join("");
+  }
+  const runs = splitRuns(segment);
+  let out = "";
+  let wordIndex = 0;
+  for (const run of runs) {
+    if (!/[А-Яа-яЁё]/.test(run)) {
+      out += run;
+      continue;
+    }
+    const lower = run.toLowerCase().replaceAll("ё", "е");
+    const parts = meaning(lower, wordIndex)
+      ? [lower]
+      : greedySplit(lower) || [lower];
+    for (let partIndex = 0; partIndex < parts.length; ++partIndex) {
+      const en = meaning(parts[partIndex], wordIndex) || parts[partIndex];
+      const upper = partIndex > 0 || /[А-ЯЁ]/.test(run[0]);
+      out +=
+        wordIndex === 0 && !upper ? en[0].toLowerCase() + en.slice(1) : cap(en);
+      wordIndex++;
+    }
+  }
+  return out;
 }
 
 function translateIdent(ident) {
-	return ident.split(/([_-])/).map(part => part === '_' || part === '-' ? part : translateSegment(part)).join('');
+  return ident
+    .split(/([_-])/)
+    .map((part) =>
+      part === "_" || part === "-" ? part : translateSegment(part),
+    )
+    .join("");
 }
 
 const FILES = [
-	'src/content/content.js',
-	'src/content/content.css',
-	'src/content/dropspatch.js',
-	'src/content/pagehook.js',
-	'src/content/gqltoken.js',
-	'src/player/player.js',
-	'src/player/player.css',
-	'src/player/player.html',
-	'src/player/worker.js',
-	'src/player/report.html',
-	'src/player/report.css',
-	'src/player/pointerevent.js',
-	'src/player/asmjs.js',
-	'src/shared/common.js',
-	'src/shared/common.css'
+  "src/content/content.js",
+  "src/content/content.css",
+  "src/content/dropspatch.js",
+  "src/content/pagehook.js",
+  "src/content/gqltoken.js",
+  "src/player/player.js",
+  "src/player/player.css",
+  "src/player/player.html",
+  "src/player/worker.js",
+  "src/player/report.html",
+  "src/player/report.css",
+  "src/player/pointerevent.js",
+  "src/player/asmjs.js",
+  "src/shared/common.js",
+  "src/shared/common.css",
 ];
 
 const identRe = /[A-Za-z0-9_]*[А-Яа-яЁё][A-Za-z0-9_А-Яа-яЁё]*/g;
 const idents = new Map();
 for (const file of FILES) {
-	const text = fs.readFileSync(file, 'utf8');
-	for (const ident of text.match(identRe) || []) {
-		idents.set(ident, (idents.get(ident) || 0) + 1);
-	}
+  const text = fs.readFileSync(file, "utf8");
+  for (const ident of text.match(identRe) || []) {
+    idents.set(ident, (idents.get(ident) || 0) + 1);
+  }
 }
 
 const translated = new Map();
 const collisions = new Map();
 for (const ident of idents.keys()) {
-	const OVERRIDES = new Map([['Узел', 'byId']]);
-	let en = OVERRIDES.get(ident) || translateIdent(ident);
-	if (en === ident) {
-		fs.appendFileSync('/tmp/ru-en-same.txt', ident + '\n');
-		continue;
-	}
-	if (collisions.has(en) && collisions.get(en) !== ident) {
-		let n = 2;
-		while (collisions.has(en + n)) n++;
-		en = en + n;
-	}
-	collisions.set(en, ident);
-	translated.set(ident, en);
+  const OVERRIDES = new Map([["Узел", "byId"]]);
+  let en = OVERRIDES.get(ident) || translateIdent(ident);
+  if (en === ident) {
+    fs.appendFileSync("/tmp/ru-en-same.txt", ident + "\n");
+    continue;
+  }
+  if (collisions.has(en) && collisions.get(en) !== ident) {
+    let n = 2;
+    while (collisions.has(en + n)) n++;
+    en = en + n;
+  }
+  collisions.set(en, ident);
+  translated.set(ident, en);
 }
 
 const missing = new Map();
 function noteMissing(word) {
-	const key = word.toLowerCase().replaceAll('ё', 'е');
-	if (!lookupWord(key) && !greedySplit(key)) missing.set(key, (missing.get(key) || 0) + 1);
+  const key = word.toLowerCase().replaceAll("ё", "е");
+  if (!lookupWord(key) && !greedySplit(key))
+    missing.set(key, (missing.get(key) || 0) + 1);
 }
 
-const apply = process.argv.includes('--apply');
-const ordered = [...translated.entries()].sort((a, b) => b[0].length - a[0].length);
+const apply = process.argv.includes("--apply");
+const ordered = [...translated.entries()].sort(
+  (a, b) => b[0].length - a[0].length,
+);
 
 function escapeRegExp(value) {
-	return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function replaceIdents(text) {
-	for (const [ru, en] of ordered) {
-		const re = new RegExp(`(?<![A-Za-z0-9_\\u0400-\\u04FF])${escapeRegExp(ru)}(?![A-Za-z0-9_\\u0400-\\u04FF])`, 'g');
-		text = text.replace(re, en);
-	}
-	return text;
+  for (const [ru, en] of ordered) {
+    const re = new RegExp(
+      `(?<![A-Za-z0-9_\\u0400-\\u04FF])${escapeRegExp(ru)}(?![A-Za-z0-9_\\u0400-\\u04FF])`,
+      "g",
+    );
+    text = text.replace(re, en);
+  }
+  return text;
 }
 
 function protectTitles(text) {
-	const saved = [];
-	const out = text.replace(/title="[^"]*"/g, match => {
-		saved.push(match);
-		return `title="__TITLE_${saved.length - 1}__"`;
-	});
-	return {out, saved};
+  const saved = [];
+  const out = text.replace(/title="[^"]*"/g, (match) => {
+    saved.push(match);
+    return `title="__TITLE_${saved.length - 1}__"`;
+  });
+  return { out, saved };
 }
 
 function restoreTitles(text, saved) {
-	return text.replace(/title="__TITLE_(\d+)__"/g, (_, index) => saved[Number(index)]);
+  return text.replace(
+    /title="__TITLE_(\d+)__"/g,
+    (_, index) => saved[Number(index)],
+  );
 }
 
 if (apply) {
-	const common = fs.readFileSync('src/shared/common.js', 'utf8');
-	const keys = [...common.matchAll(/^\t\t([^\s:]+):/gm)].map(match => match[1]);
-	const map = {};
-	for (const key of keys) {
-		if (translated.has(key)) map[key] = translated.get(key);
-	}
-	fs.writeFileSync('/tmp/settings-map.json', JSON.stringify(map, null, '\t'));
-	for (const file of FILES) {
-		let text = fs.readFileSync(file, 'utf8');
-		const html = file.endsWith('.html');
-		const protectedTitles = html ? protectTitles(text) : null;
-		text = replaceIdents(protectedTitles ? protectedTitles.out : text);
-		if (protectedTitles) text = restoreTitles(text, protectedTitles.saved);
-		fs.writeFileSync(file, text);
-	}
+  const common = fs.readFileSync("src/shared/common.js", "utf8");
+  const keys = [...common.matchAll(/^\t\t([^\s:]+):/gm)].map(
+    (match) => match[1],
+  );
+  const map = {};
+  for (const key of keys) {
+    if (translated.has(key)) map[key] = translated.get(key);
+  }
+  fs.writeFileSync("/tmp/settings-map.json", JSON.stringify(map, null, "\t"));
+  for (const file of FILES) {
+    let text = fs.readFileSync(file, "utf8");
+    const html = file.endsWith(".html");
+    const protectedTitles = html ? protectTitles(text) : null;
+    text = replaceIdents(protectedTitles ? protectedTitles.out : text);
+    if (protectedTitles) text = restoreTitles(text, protectedTitles.saved);
+    fs.writeFileSync(file, text);
+  }
 }
 
-const sample = [...translated.entries()].sort((a, b) => idents.get(b[0]) - idents.get(a[0])).slice(0, 40);
-console.log('idents', idents.size, 'translated', translated.size, 'collisions', [...collisions.keys()].length);
+const sample = [...translated.entries()]
+  .sort((a, b) => idents.get(b[0]) - idents.get(a[0]))
+  .slice(0, 40);
+console.log(
+  "idents",
+  idents.size,
+  "translated",
+  translated.size,
+  "collisions",
+  [...collisions.keys()].length,
+);
 let same = 0;
 for (const [ru, en] of translated) if (/[А-Яа-яЁё]/.test(en)) same++;
-console.log('still cyrillic', same);
-console.log('--- top ---');
+console.log("still cyrillic", same);
+console.log("--- top ---");
 for (const [ru, en] of sample) console.log(`${idents.get(ru)}\t${ru} => ${en}`);
 
 const leftovers = [];
 for (const [ru, en] of translated) {
-	if (/[А-Яа-яЁё]/.test(en)) leftovers.push(`${ru} => ${en}`);
+  if (/[А-Яа-яЁё]/.test(en)) leftovers.push(`${ru} => ${en}`);
 }
-fs.writeFileSync('/tmp/ru-en-leftovers.txt', leftovers.join('\n'));
-console.log('leftovers', leftovers.length);
+fs.writeFileSync("/tmp/ru-en-leftovers.txt", leftovers.join("\n"));
+console.log("leftovers", leftovers.length);
 if (apply) {
-	const settings = fs.readFileSync('src/shared/common.js', 'utf8');
-	console.log('applied');
+  const settings = fs.readFileSync("src/shared/common.js", "utf8");
+  console.log("applied");
 }

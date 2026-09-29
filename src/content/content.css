@@ -158,7 +158,9 @@ a.tw5-drops-active svg {
     --tw5-paddingOn: 0.2rem;
     --tw5-chatbottompadding: 0.4rem;
     --tw5-messageinputheight: var(--button-size-default);
-    --tw5-aboveinput-in: (var(--tw5-chatbottompadding) + var(--tw5-messageinputheight));
+    --tw5-aboveinput-in: (
+      var(--tw5-chatbottompadding) + var(--tw5-messageinputheight)
+    );
   }
   html .stream-chat-header {
     height: var(--tw5-headerheight);
