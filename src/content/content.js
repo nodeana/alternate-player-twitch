@@ -525,6 +525,50 @@ function отправитьСлежениеЗаПросмотром(оСообщ
 	}).catch(ЗАГЛУШКА);
 }
 
+function удержатьТемуЧата() {
+	const лТёмная = Boolean(м_Настройки.Получить('лЗатемнитьЧат'));
+	const сНужная = лТёмная ? 'tw-root--theme-dark' : 'tw-root--theme-light';
+	const сЧужая = лТёмная ? 'tw-root--theme-light' : 'tw-root--theme-dark';
+	const наблюдаемые = new WeakSet();
+	const наблюдатель = new MutationObserver(() => {
+		следить(document.body, true);
+		следить(document.getElementById('root'), false);
+		применить();
+	});
+	function применить() {
+		for (const уз of [ document.documentElement, document.body, document.getElementById('root') ]) {
+			if (!уз || !уз.classList.contains(сЧужая)) {
+				continue;
+			}
+			уз.classList.remove(сЧужая);
+			уз.classList.add(сНужная);
+		}
+	}
+	function следить(уз, лДети) {
+		if (!уз || наблюдаемые.has(уз)) {
+			return;
+		}
+		наблюдаемые.add(уз);
+		наблюдатель.observe(уз, {
+			attributes: true,
+			attributeFilter: [ 'class' ],
+			childList: лДети
+		});
+	}
+	function подключить() {
+		следить(document.documentElement, false);
+		следить(document.body, true);
+		следить(document.getElementById('root'), false);
+		применить();
+	}
+	подключить();
+	if (!document.body) {
+		document.addEventListener('DOMContentLoaded', подключить, {
+			once: true
+		});
+	}
+}
+
 function изменитьПоведениеЧата() {
 	window.addEventListener('click', оСобытие => {
 		if (оСобытие.button !== ЛЕВАЯ_КНОПКА) {
@@ -629,6 +673,7 @@ function удалитьХвостыСтаройВерсии() {}
 			изменитьСтильЧата();
 			изменитьПоведениеЧата();
 		}
+		м_Настройки.Восстановить().then(удержатьТемуЧата).catch(ЗАГЛУШКА);
 		return;
 	}
 	удалитьХвостыСтаройВерсии();
