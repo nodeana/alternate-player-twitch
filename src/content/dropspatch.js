@@ -310,10 +310,10 @@
 			return;
 		}
 		document.cookie = `tw5~gqltoken=${encodeURIComponent(JSON.stringify({
-			сТокен: token,
-			чПротухнетПосле: Date.now() + 60 * 60 * 1000,
-			сСессия: headerGet(capturedGqlHeaders, 'Client-Session-Id'),
-			сВерсия: headerGet(capturedGqlHeaders, 'Client-Version')
+			sToken: token,
+			nExpiresAfter: Date.now() + 60 * 60 * 1000,
+			sSession: headerGet(capturedGqlHeaders, 'Client-Session-Id'),
+			sVersion: headerGet(capturedGqlHeaders, 'Client-Version')
 		}))}; path=/tw5~storage/; samesite=none; secure; max-age=86400`;
 	}
 
@@ -520,10 +520,10 @@
 			const expiration = Number(data.expiration);
 			const expiresAt = Number.isFinite(expiration) ? (expiration < 1e12 ? expiration * 1000 : expiration) : Date.now() + 60 * 60 * 1000;
 			document.cookie = `tw5~gqltoken=${encodeURIComponent(JSON.stringify({
-				сТокен: data.token,
-				чПротухнетПосле: expiresAt,
-				сСессия: headerGet(headers, 'Client-Session-Id'),
-				сВерсия: headerGet(headers, 'Client-Version')
+				sToken: data.token,
+				nExpiresAfter: expiresAt,
+				sSession: headerGet(headers, 'Client-Session-Id'),
+				sVersion: headerGet(headers, 'Client-Version')
 			}))}; path=/tw5~storage/; samesite=none; secure; max-age=86400`;
 			return true;
 		}).catch(() => false);

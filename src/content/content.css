@@ -1,6 +1,6 @@
 @charset "utf-8";
 :root {
-  --tw5-ширинаспискасмайликов: 90rem;
+  --tw5-emotelistwidth: 90rem;
 }
 .tw-balloon[data-a-target="chat-settings-balloon"],
 .chat-input__badge-carousel .tw-balloon {
@@ -20,7 +20,7 @@ html .chat-settings__popover {
 }
 html .emote-picker {
   max-width: 100%;
-  width: var(--tw5-ширинаспискасмайликов);
+  width: var(--tw5-emotelistwidth);
 }
 .community-points-summary + .tw-transition > div > div > .tw-balloon {
   max-width: unset;
@@ -154,20 +154,20 @@ a.tw5-drops-active svg {
 }
 @media (max-height: 33em) {
   :root {
-    --tw5-высотазаголовка: 0px;
-    --tw5-отступокна: 0.2rem;
-    --tw5-нижнийотступчата: 0.4rem;
-    --tw5-высотавводасообщения: var(--button-size-default);
-    --tw5-вышеавода-в: (var(--tw5-нижнийотступчата) + var(--tw5-высотавводасообщения));
+    --tw5-headerheight: 0px;
+    --tw5-paddingOn: 0.2rem;
+    --tw5-chatbottompadding: 0.4rem;
+    --tw5-messageinputheight: var(--button-size-default);
+    --tw5-aboveinput-in: (var(--tw5-chatbottompadding) + var(--tw5-messageinputheight));
   }
   html .stream-chat-header {
-    height: var(--tw5-высотазаголовка);
+    height: var(--tw5-headerheight);
     overflow: hidden;
     z-index: var(--z-index-default) !important;
   }
   .stream-chat-header > div:last-child {
     position: fixed !important;
-    bottom: var(--tw5-нижнийотступчата) !important;
+    bottom: var(--tw5-chatbottompadding) !important;
     margin-right: 0.5rem !important;
     max-width: calc(100vw - 0.5rem);
     flex-wrap: wrap;
@@ -177,11 +177,11 @@ a.tw5-drops-active svg {
     padding-bottom: 0 !important;
   }
   html .chat-input {
-    padding-bottom: var(--tw5-нижнийотступчата) !important;
+    padding-bottom: var(--tw5-chatbottompadding) !important;
     margin-right: var(--button-size-default);
   }
   html .chat-input__textarea textarea:empty {
-    height: var(--tw5-высотавводасообщения) !important;
+    height: var(--tw5-messageinputheight) !important;
     min-height: unset;
     padding-top: 0.3rem;
     padding-bottom: 0;

@@ -9,15 +9,15 @@ function AsmjsModule(stdlib, foreign, heap)
 
 	function SearchStartCodePrefix(pStream, pStreamEnd)
 	// ITU-T H.264:2014 Annex B
-	// Ищет start code prefix: минимум два нулевых байта, за ними единица.
-	// Состав префикса в зависимости от его длины:
+	// Seeks start code prefix: minimum two zero byte2, for2 them unit.
+	// Composition prefix in dependency from its length2:
 	// =3 - start_code_prefix_one_3bytes
 	// =4 - zero_byte + start_code_prefix_one_3bytes
-	// >4 - leading_zero_8bits или trailing_zero_8bits + zero_byte + start_code_prefix_one_3bytes
-	// Возвращает указатель на начало префикса. В Int32Array(heap)[0] возвращает размер префикса.
-	// Если префикс не найден, то возвращает pStreamEnd. Размер не определен.
-	// Если данные повреждены, то возвращает -2.
-	// Выход параметров функции за пределы буфера не проверяется.
+	// >4 - leading_zero_8bits or trailing_zero_8bits + zero_byte + start_code_prefix_one_3bytes
+	// Returns pointer on start6 prefix. IN Int32Array(heap)[0] returns size prefix.
+	// If prefix2 not found2, that returns pStreamEnd. Size not defined.
+	// If data damaged, that returns -2.
+	// Exit parameters3 function for2 limits buffer3 not checking.
 	{
 		pStream = pStream|0;
 		pStreamEnd = pStreamEnd|0;
@@ -32,7 +32,7 @@ function AsmjsModule(stdlib, foreign, heap)
 
 		for (;;)
 		{
-			// Большую часть времени выполняется следующий код
+			// Large part time2 running2 next code
 			// ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
 			uByte = _abHeap[(pStream + 2) >> 0]|0;
 			if ((uByte|0) > 1)
@@ -67,7 +67,7 @@ function AsmjsModule(stdlib, foreign, heap)
 		}
 
 		pStart = pStream;
-		// Chrome 67 теряет скорость если прибавить 3.
+		// Chrome 67 loses speed if add 3.
 		pStream = (pStream + 2)|0;
 
 		while ((uByte|0) == 0)
@@ -81,8 +81,8 @@ function AsmjsModule(stdlib, foreign, heap)
 		}
 		if ((uByte|0) != 1)
 		{
-			// Twitch: Иногда в filler data встречаются последовательности нулевых байтов произвольной длины.
-			// Они не мешают просмотру, но нарушают несколько правил стандарта H.264.
+			// Twitch: Sometimes in filler data occur sequence zero bytes arbitrary length2.
+			// They not interfere watch5, but violate several2 rules standard2 H.264.
 			return -2|0;
 		}
 

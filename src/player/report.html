@@ -6,21 +6,21 @@
   </title>
   <link rel="stylesheet" href="../shared/common.css">
   <link rel="stylesheet" href="report.css">
-  <form id="отладка-сообщение" hidden>
+  <form id="debug-message" hidden>
     <p>
-      <span id="отладка-текстсообщения">
+      <span id="debug-messagetext">
       </span>
-      <a id="отладка-ссылкасообщения" target="_top" rel="noopener noreferrer">
+      <a id="debug-messagelink" target="_top" rel="noopener noreferrer">
       </a>
     </p>
-    <div id="отладка-автоперезагрузка" hidden>
-      <p id="отладка-автоперезагрузка-текст" class="отладка-автоперезагрузка-текст">
+    <div id="debug-autoreload" hidden>
+      <p id="debug-autoreload-text" class="debug-autoreload-text">
       </p>
-      <button type="button" id="отладка-автоперезагрузка-отмена" data-i18n="F0718">
+      <button type="button" id="debug-autoreload-cancel" data-i18n="F0718">
       </button>
     </div>
   </form>
-  <form id="отладка-отзыв" hidden>
+  <form id="debug-feedback" hidden>
     <h3 data-i18n="F0700">
     </h3>
     <div data-i18n="F1501">
@@ -30,9 +30,9 @@
         <p data-i18n="F0727">
           <p data-i18n="F0723">
             <p>
-              <label for="отладка-отзыв-сообщение" data-i18n="F0702">
+              <label for="debug-feedback-message" data-i18n="F0702">
               </label>
-              <textarea id="отладка-отзыв-сообщение" name="отладка-сообщение" rows="6" minlength="4" maxlength="10000" spellcheck="true" required autofocus>
+              <textarea id="debug-feedback-message" name="debug-message" rows="6" minlength="4" maxlength="10000" spellcheck="true" required autofocus>
               </textarea>
               <p>
                 <label>
@@ -40,16 +40,16 @@
                   </span>
                   <span data-i18n="F0728">
                   </span>
-                  <input name="отладка-почта" type="email" maxlength="254" spellcheck="false">
+                  <input name="debug-mail" type="email" maxlength="254" spellcheck="false">
                 </label>
                 <p>
                   <span data-i18n="F0704">
                   </span>
-                  <label for="отладка-отзыв-показатьотчет" class="отладка-ссылкакнопка" data-i18n="F0705">
+                  <label for="debug-feedback-showReport" class="debug-linkbutton" data-i18n="F0705">
                   </label>
                   .
-                  <input id="отладка-отзыв-показатьотчет" type="checkbox" hidden>
-                  <textarea name="отладка-отчет" rows="15" spellcheck="false" required readonly>
+                  <input id="debug-feedback-showReport" type="checkbox" hidden>
+                  <textarea name="debug-report" rows="15" spellcheck="false" required readonly>
                   </textarea>
                   <a href="https://coolcmd.github.io/privacy.html" target="_blank" rel="noopener noreferrer" data-i18n="F0706">
                   </a>
@@ -60,28 +60,28 @@
                     <button type="reset" data-i18n="F0718">
                     </button>
                   </p>
-                  <input name="отладка-типданных" type="hidden" value="отзыв">
+                  <input name="debug-typeData" type="hidden" value="feedback">
                 </form>
-                <form id="отладка-ошибка" hidden>
+                <form id="debug-error" hidden>
                   <h3 data-i18n="F0708">
                   </h3>
                   <p>
                     <span data-i18n="F0712">
                     </span>
-                    <label for="отладка-ошибка-показатьотчет" class="отладка-ссылкакнопка" data-i18n="F0705">
+                    <label for="debug-error-showReport" class="debug-linkbutton" data-i18n="F0705">
                     </label>
                     .
-                    <input id="отладка-ошибка-показатьотчет" type="checkbox" hidden>
-                    <textarea name="отладка-отчет" rows="15" spellcheck="false" required readonly>
+                    <input id="debug-error-showReport" type="checkbox" hidden>
+                    <textarea name="debug-report" rows="15" spellcheck="false" required readonly>
                     </textarea>
                     <a href="https://coolcmd.github.io/privacy.html" target="_blank" rel="noopener noreferrer" data-i18n="F0706">
                     </a>
                     .
                     <p data-i18n="F0710">
                       <p>
-                        <label for="отладка-ошибка-сообщение" data-i18n="F0715">
+                        <label for="debug-error-message" data-i18n="F0715">
                         </label>
-                        <textarea id="отладка-ошибка-сообщение" name="отладка-сообщение" rows="3" maxlength="10000" spellcheck="true">
+                        <textarea id="debug-error-message" name="debug-message" rows="3" maxlength="10000" spellcheck="true">
                         </textarea>
                         <p>
                           <label>
@@ -89,25 +89,25 @@
                             </span>
                             <span data-i18n="F0728">
                             </span>
-                            <input name="отладка-почта" type="email" maxlength="254" spellcheck="false">
+                            <input name="debug-mail" type="email" maxlength="254" spellcheck="false">
                           </label>
                           <p>
                             <button type="submit" autofocus data-i18n="F0707">
                             </button>
                           </p>
-                          <input name="отладка-типданных" type="hidden" value="ошибка">
+                          <input name="debug-typeData" type="hidden" value="error">
                         </form>
-                        <form id="отладка-идетотправка" hidden>
+                        <form id="debug-sendprogress" hidden>
                           <p>
                             <span data-i18n="F0717">
                             </span>
-                            <progress id="отладка-ходотправки">
+                            <progress id="debug-sendprogress2">
                             </progress>
                           </p>
                           <button type="submit" autofocus data-i18n="F0718">
                           </button>
                         </form>
-                        <form id="отладка-сбойотправки" hidden>
+                        <form id="debug-sendfailed" hidden>
                           <p data-i18n="F0719">
                           </p>
                           <button type="submit" autofocus data-i18n="F0720">
@@ -115,9 +115,9 @@
                           <button type="reset" data-i18n="F0718">
                           </button>
                         </form>
-                        <form id="отладка-браузерустарел" hidden>
+                        <form id="debug-browseroutdated" hidden>
                           <p data-i18n="F0730">
                           </form>
-                          <form id="отладка-версияустарела" hidden>
+                          <form id="debug-versionoutdated" hidden>
                             <p data-i18n="F0729">
                             </form>

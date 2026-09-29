@@ -1,19 +1,19 @@
 @charset "utf-8";
-.отладка-сообщение {
+.debug-message {
   color: #fff;
   background: #6441a5;
 }
-.отладка-отзыв {
+.debug-feedback {
   color: #fff;
   background: linear-gradient(#1f5cad, #3171c4 18px, #0f2e57) fixed;
 }
-.отладка-ошибка,
-.отладка-сбойотправки {
+.debug-error,
+.debug-sendfailed {
   color: #fff;
   background: linear-gradient(#420000, #790303 30px, #4a0000) fixed;
 }
-.отладка-браузерустарел,
-.отладка-версияустарела {
+.debug-browseroutdated,
+.debug-versionoutdated {
   color: #fff;
   background: #f40;
 }
@@ -27,9 +27,9 @@ form {
   padding: 0 1em;
   text-align: center;
 }
-#отладка-сообщение,
-#отладка-отзыв,
-#отладка-ошибка {
+#debug-message,
+#debug-feedback,
+#debug-error {
   text-align: justify;
 }
 a {
@@ -40,12 +40,12 @@ a {
 a:not([href]) {
   display: none;
 }
-.отладка-ссылкакнопка {
+.debug-linkbutton {
   border-bottom: 1px dashed;
   cursor: pointer;
 }
 a:hover,
-.отладка-ссылкакнопка:hover {
+.debug-linkbutton:hover {
   opacity: 0.85;
 }
 textarea,
@@ -54,7 +54,7 @@ input[type="email"] {
   width: 100%;
   line-height: inherit;
 }
-textarea[name="отладка-отчет"] {
+textarea[name="debug-report"] {
   font:
     13px/1.5 Consolas,
     Monaco,
@@ -62,24 +62,24 @@ textarea[name="отладка-отчет"] {
     "Lucida Console",
     monospace;
 }
-input[type="checkbox"]:not(:checked) + [name="отладка-отчет"] {
+input[type="checkbox"]:not(:checked) + [name="debug-report"] {
   display: none;
 }
-#отладка-текстсообщения {
+#debug-messagetext {
   white-space: pre-wrap;
 }
-#отладка-автоперезагрузка {
+#debug-autoreload {
   margin-top: 1.5em;
   padding-top: 1em;
   border-top: 1px solid rgba(255, 255, 255, 0.35);
   text-align: center;
 }
-.отладка-автоперезагрузка-текст {
+.debug-autoreload-text {
   margin: 0 0 0.75em;
   font-size: 1.05em;
   font-weight: 600;
 }
-#отладка-автоперезагрузка-отмена {
+#debug-autoreload-cancel {
   min-width: 11em;
   padding: 0.4em 1em;
   font: inherit;
@@ -88,7 +88,7 @@ input[type="checkbox"]:not(:checked) + [name="отладка-отчет"] {
   border: 1px solid currentColor;
   cursor: pointer;
 }
-#отладка-автоперезагрузка-отмена:hover {
+#debug-autoreload-cancel:hover {
   opacity: 0.85;
 }
 button[type="submit"] {

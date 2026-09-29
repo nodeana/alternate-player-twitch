@@ -3,10 +3,10 @@
 // Runs in the page MAIN world (see manifest content_scripts.world).
 // Patches history/title so SPA channel changes notify the isolated content script.
 
-(function перехватитьФункции() {
-	let _лНеПерехватывать = false;
-	window.addEventListener('tw5-неперехватывать', () => {
-		_лНеПерехватывать = true;
+(function captureFunction() {
+	let _isNotCapture = false;
+	window.addEventListener('tw5-nocapture', () => {
+		_isNotCapture = true;
 	});
 	const oTitleDescriptor = Object.getOwnPropertyDescriptor(Document.prototype, 'title');
 	Object.defineProperty(document, 'title', {
@@ -16,54 +16,54 @@
 			return oTitleDescriptor.get.call(this);
 		},
 		set(title) {
-			if (_лНеПерехватывать) {
+			if (_isNotCapture) {
 				oTitleDescriptor.set.call(this, title);
-			} else if (this.documentElement.hasAttribute('data-tw5-перенаправление')) {} else {
+			} else if (this.documentElement.hasAttribute('data-tw5-redirect')) {} else {
 				oTitleDescriptor.set.call(this, title);
-				window.dispatchEvent(new CustomEvent('tw5-изменензаголовок'));
+				window.dispatchEvent(new CustomEvent('tw5-changedHeader'));
 			}
 		}
 	});
-	function уведомитьСменуПути(сБыло) {
-		if (сБыло !== location.pathname) {
+	function notifySwitchPath(sWas) {
+		if (sWas !== location.pathname) {
 			oTitleDescriptor.set.call(document, 'Twitch');
 			window.dispatchEvent(new CustomEvent('tw5-pushstate'));
 		}
 	}
 	const fPushState = History.prototype.pushState;
 	History.prototype.pushState = function(state, title, url) {
-		if (_лНеПерехватывать || document.documentElement.hasAttribute('data-tw5-перенаправление')) {
+		if (_isNotCapture || document.documentElement.hasAttribute('data-tw5-redirect')) {
 			return fPushState.apply(this, arguments);
 		}
-		const сБыло = location.pathname;
-		const результат = fPushState.apply(this, arguments);
-		уведомитьСменуПути(сБыло);
-		return результат;
+		const sWas = location.pathname;
+		const result = fPushState.apply(this, arguments);
+		notifySwitchPath(sWas);
+		return result;
 	};
 	const fReplaceState = History.prototype.replaceState;
 	History.prototype.replaceState = function(state, title, url) {
-		if (_лНеПерехватывать || document.documentElement.hasAttribute('data-tw5-перенаправление')) {
+		if (_isNotCapture || document.documentElement.hasAttribute('data-tw5-redirect')) {
 			return fReplaceState.apply(this, arguments);
 		}
-		const сБыло = location.pathname;
-		const результат = fReplaceState.apply(this, arguments);
-		уведомитьСменуПути(сБыло);
-		return результат;
+		const sWas = location.pathname;
+		const result = fReplaceState.apply(this, arguments);
+		notifySwitchPath(sWas);
+		return result;
 	};
 })();
 
-(function разрешитьРаботуЧата() {
-	const мсЧасти = location.pathname.split('/');
-	const лЧат = (мсЧасти[1] === 'embed' || мсЧасти[1] === 'popout') && мсЧасти[2] && мсЧасти[3] === 'chat';
-	if (!лЧат) {
+(function allowWorkChat() {
+	const strsPart = location.pathname.split('/');
+	const isChat = (strsPart[1] === 'embed' || strsPart[1] === 'popout') && strsPart[2] && strsPart[3] === 'chat';
+	if (!isChat) {
 		return;
 	}
 	const fGetItem = Storage.prototype.getItem;
-	Storage.prototype.getItem = function(сИмя) {
-		let сЗначение = fGetItem.apply(this, arguments);
-		if (сИмя === 'TwitchCache:Layout' && сЗначение) {
-			сЗначение = сЗначение.replace('"isRightColumnClosedByUserAction":true', '"isRightColumnClosedByUserAction":false');
+	Storage.prototype.getItem = function(sName) {
+		let sValue = fGetItem.apply(this, arguments);
+		if (sName === 'TwitchCache:Layout' && sValue) {
+			sValue = sValue.replace('"isRightColumnClosedByUserAction":true', '"isRightColumnClosedByUserAction":false');
 		}
-		return сЗначение;
+		return sValue;
 	};
 })();

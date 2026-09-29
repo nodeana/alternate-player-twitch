@@ -3,26 +3,26 @@
 // Runs in the page MAIN world (see manifest content_scripts.world).
 // Hooks fetch so GQL integrity tokens can be persisted for the player.
 
-(function перехватитьФункцию() {
-	const оригинальнаяФункция = window.fetch;
-	window.fetch = function(адрес, параметры) {
-		const обещание = оригинальнаяФункция(адрес, параметры);
-		if (адрес === 'https://gql.twitch.tv/integrity' && параметры && параметры.method && параметры.method.toUpperCase() === 'POST' && параметры.headers && параметры.headers.Authorization) {
-			обещание.then(ответ => {
-				if (ответ.ok && ответ.status === 200) {
-					return ответ.clone().json().then(({token: сТокен, expiration: чПротухнетПосле}) => {
-						if (typeof сТокен == 'string' && сТокен && Number.isSafeInteger(чПротухнетПосле)) {
-							const текущееВремя = Date.now();
-							чПротухнетПосле = Math.min(Math.max(чПротухнетПосле - 3 * 60 * 1e3, текущееВремя + 1 * 60 * 60 * 1e3), текущееВремя + 24 * 60 * 60 * 1e3);
+(function captureFunction2() {
+	const originalFunction = window.fetch;
+	window.fetch = function(address, parameters) {
+		const promise = originalFunction(address, parameters);
+		if (address === 'https://gql.twitch.tv/integrity' && parameters && parameters.method && parameters.method.toUpperCase() === 'POST' && parameters.headers && parameters.headers.Authorization) {
+			promise.then(response => {
+				if (response.ok && response.status === 200) {
+					return response.clone().json().then(({token: sToken, expiration: nExpiresAfter}) => {
+						if (typeof sToken == 'string' && sToken && Number.isSafeInteger(nExpiresAfter)) {
+							const currentTime = Date.now();
+							nExpiresAfter = Math.min(Math.max(nExpiresAfter - 3 * 60 * 1e3, currentTime + 1 * 60 * 60 * 1e3), currentTime + 24 * 60 * 60 * 1e3);
 							document.cookie = `tw5~gqltoken=${encodeURIComponent(JSON.stringify({
-								сТокен,
-								чПротухнетПосле
+								sToken,
+								nExpiresAfter
 							}))}; path=/tw5~storage/; samesite=none; secure; max-age=86400`;
 						}
 					});
 				}
-			}).catch(причина => {});
+			}).catch(reason => {});
 		}
-		return обещание;
+		return promise;
 	};
 })();

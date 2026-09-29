@@ -6,8 +6,8 @@
 input,
 button,
 select,
-.радио-значок,
-.флажок-значок {
+.radio-icon,
+.checkbox-icon {
   -webkit-appearance: none;
   appearance: none;
   margin: 0;
@@ -58,27 +58,27 @@ select {
   background-position: right;
   background-repeat: no-repeat;
 }
-.радио-метка + .радио-метка {
+.radio-label + .radio-label {
   margin-left: 1em;
 }
-.радио-значок,
-.флажок-значок {
+.radio-icon,
+.checkbox-icon {
   display: inline-block;
   width: 1.4167em;
   height: 1.4167em;
   vertical-align: middle;
   background: url(player.svg#radio0) center no-repeat;
 }
-.флажок-значок {
+.checkbox-icon {
   background-image: url(player.svg#checkbox0);
 }
-input:checked + .радио-значок {
+input:checked + .radio-icon {
   background-image: url(player.svg#radio1);
 }
-input:checked + .флажок-значок {
+input:checked + .checkbox-icon {
   background-image: url(player.svg#checkbox1);
 }
-.радио-текст {
+.radio-text {
   margin-left: 0.25em;
   vertical-align: middle;
 }
@@ -93,38 +93,38 @@ kbd {
   color: #000;
   background: #d5d5df;
 }
-.окно {
+.window {
   position: absolute;
   z-index: 4;
   margin: 0.25rem;
   padding: 0.625rem;
   border-radius: 0.125rem;
-  background: linear-gradient(45deg, rgba(var(--сЦветГрадиента), 0.05) 40%, rgba(var(--сЦветГрадиента), 0.25)),
-    rgba(var(--сЦветФона), var(--чНепрозрачностьОкна));
+  background: linear-gradient(45deg, rgba(var(--sColorGradient), 0.05) 40%, rgba(var(--sColorGradient), 0.25)),
+    rgba(var(--sColorBackground), var(--nOpacityWindow));
   visibility: hidden;
   opacity: 0;
   transform: scale(0.8);
 }
-.окнооткрыто {
+.windowopen {
   visibility: visible;
   opacity: 1;
   transform: none;
 }
-.анимацияинтерфейса .анимацияокна {
+.uianimation .animationWindow {
   transition: 0.15s ease-out;
   transition-property: visibility, opacity, transform;
 }
-.индикаторпрокрутки {
+.scrollindicator {
   width: 100%;
   height: 3.217ex;
   position: relative;
   top: -0.625rem;
   background: url(player.svg#svg-scrolldown) center no-repeat;
 }
-.окнооткрыто .индикаторпрокрутки {
-  animation: 2.5s linear infinite индикаторпрокрутки;
+.windowopen .scrollindicator {
+  animation: 2.5s linear infinite scrollindicator;
 }
-@keyframes индикаторпрокрутки {
+@keyframes scrollindicator {
   85% {
     transform: translateY(0);
   }
@@ -135,7 +135,7 @@ kbd {
     transform: translateY(0);
   }
 }
-.тащилка-перехват::after {
+.draghandle-capture::after {
   content: "";
   position: fixed;
   top: 0;
@@ -144,7 +144,7 @@ kbd {
   height: 100%;
   z-index: 1000;
 }
-[data-тащилка] {
+[data-draghandle] {
   touch-action: none;
   -webkit-user-select: none;
   user-select: none;
@@ -152,12 +152,12 @@ kbd {
 ::backdrop {
   display: none;
 }
-#проигрывательичат:-webkit-full-screen {
+#playerandchat:-webkit-full-screen {
   width: 100%;
   height: 100%;
   background: 0 0;
 }
-#проигрывательичат:fullscreen {
+#playerandchat:fullscreen {
   width: 100%;
   height: 100%;
   background: 0 0;
@@ -165,7 +165,7 @@ kbd {
 body {
   background: #000;
 }
-#проигрывательичат {
+#playerandchat {
   height: 100%;
   overflow: hidden;
   display: flex;
@@ -175,39 +175,39 @@ body {
     Helvetica,
     sans-serif;
   white-space: nowrap;
-  color: rgb(var(--сЦветКнопок));
+  color: rgb(var(--sColorButtons));
   text-shadow: 0 0.0625rem 0.0625rem #333;
 }
-#проигрыватель {
+#player {
   min-width: calc(2.125rem * 3.56);
   min-height: calc(2.125rem * 2);
   position: relative;
   flex: 1;
 }
-.автоскрытие:not([data-состояние="3"]):not([data-состояние="7"]):not([data-окно-открыто]):not(.выборскорости):not(
-    .нетвидео
+.autohide:not([data-state="3"]):not([data-state="7"]):not([data-window-open]):not(.speedchoice):not(
+    .novideo
   )
-  #проигрыватель {
+  #player {
   cursor: none;
 }
-#размерчата:hover,
-#размерчата.тащилка {
+#chatsize:hover,
+#chatsize.draghandle {
   opacity: 1;
 }
-.анимацияинтерфейса #размерчата {
+.uianimation #chatsize {
   transition: opacity 0.35s ease-out;
 }
-#размерчата:hover + #чат-оболочка {
+#chatsize:hover + #chat2-shell {
   pointer-events: none;
 }
-#чат-оболочка {
+#chat2-shell {
   position: relative;
   min-width: 220px;
   min-height: 188px;
   flex: 0 0 auto;
   align-self: stretch;
 }
-#чат {
+#chat2 {
   display: block;
   width: 100%;
   height: 100%;
@@ -215,7 +215,7 @@ body {
   min-width: 0;
   min-height: 0;
 }
-#чат-перезагрузка {
+#chat2-reload {
   position: absolute;
   inset: 0;
   z-index: 7;
@@ -230,107 +230,107 @@ body {
   text-align: center;
   pointer-events: auto;
 }
-#чат-перезагрузка[hidden] {
+#chat2-reload[hidden] {
   display: none;
 }
-#чат-перезагрузка-текст {
+#chat2-reload-text {
   margin: 0;
   font-weight: 600;
 }
-.чат-перезагрузка-кнопки {
+.chat2-reload-button3 {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
   justify-content: center;
 }
-.скрытьчат #размерчата,
-.скрытьчат #чат-оболочка {
+.hidechat #chatsize,
+.hidechat #chat2-shell {
   display: none;
 }
-#размерчата {
+#chatsize {
   flex: 0 0 0.625rem;
   margin: 0 -0.375rem 0 -0.25rem;
   background: linear-gradient(
       to bottom,
-      rgba(var(--сЦветФона), var(--чНепрозрачность)),
-      rgba(var(--сЦветКнопок), var(--чНепрозрачность)),
-      rgba(var(--сЦветФона), var(--чНепрозрачность))
+      rgba(var(--sColorBackground), var(--nOpacity)),
+      rgba(var(--sColorButtons), var(--nOpacity)),
+      rgba(var(--sColorBackground), var(--nOpacity))
     )
     0.1875rem 0%/0.125rem 100% no-repeat;
   cursor: ew-resize;
   z-index: 6;
   opacity: 0;
 }
-.чатслева #размерчата {
+.chatonleft #chatsize {
   flex: 0 0 0.5rem;
   margin: 0 -0.4375rem 0 -0.0625rem;
   background: linear-gradient(
       to bottom,
-      rgba(var(--сЦветФона), var(--чНепрозрачность)),
-      rgba(var(--сЦветКнопок), var(--чНепрозрачность)),
-      rgba(var(--сЦветФона), var(--чНепрозрачность))
+      rgba(var(--sColorBackground), var(--nOpacity)),
+      rgba(var(--sColorButtons), var(--nOpacity)),
+      rgba(var(--sColorBackground), var(--nOpacity))
     )
     0% 0%/0.125rem 100% no-repeat;
 }
-.чатслева #проигрывательичат {
+.chatonleft #playerandchat {
   flex-direction: row-reverse;
 }
-.чатвнизу #проигрывательичат {
+.chatonbottom #playerandchat {
   flex-direction: column;
 }
-.чатвверху #проигрывательичат {
+.chatontop #playerandchat {
   flex-direction: column-reverse;
 }
-.чатсправа:not(.автоположениечата) #чат-оболочка,
-.чатслева:not(.автоположениечата) #чат-оболочка {
+.chatonright:not(.chatautoposition) #chat2-shell,
+.chatonleft:not(.chatautoposition) #chat2-shell {
   height: 100%;
 }
-.чатвнизу:not(.автоположениечата) #чат-оболочка,
-.чатвверху:not(.автоположениечата) #чат-оболочка {
+.chatonbottom:not(.chatautoposition) #chat2-shell,
+.chatontop:not(.chatautoposition) #chat2-shell {
   width: 100%;
 }
-.чатвнизу:not(.автоположениечата) #размерчата,
-.чатвверху:not(.автоположениечата) #размерчата {
+.chatonbottom:not(.chatautoposition) #chatsize,
+.chatontop:not(.chatautoposition) #chatsize {
   flex: 0 0 0.5rem;
   margin: -0.25rem 0;
   background: linear-gradient(
       to right,
-      rgba(var(--сЦветФона), var(--чНепрозрачность)),
-      rgba(var(--сЦветКнопок), var(--чНепрозрачность)),
-      rgba(var(--сЦветФона), var(--чНепрозрачность))
+      rgba(var(--sColorBackground), var(--nOpacity)),
+      rgba(var(--sColorButtons), var(--nOpacity)),
+      rgba(var(--sColorBackground), var(--nOpacity))
     )
     0% center/100% 0.125rem no-repeat;
   cursor: ns-resize;
 }
 @media all and (min-aspect-ratio: 16/10) {
-  .автоположениечата #проигрывательичат {
+  .chatautoposition #playerandchat {
     flex-direction: row;
   }
-  .автоположениечата.чатслева #проигрывательичат {
+  .chatautoposition.chatonleft #playerandchat {
     flex-direction: row-reverse;
   }
-  .автоположениечата #чат-оболочка {
+  .chatautoposition #chat2-shell {
     height: 100%;
   }
 }
 @media not all and (min-aspect-ratio: 16/10) {
-  .автоположениечата #проигрывательичат {
+  .chatautoposition #playerandchat {
     flex-direction: column;
   }
-  .автоположениечата.чатвверху #проигрывательичат {
+  .chatautoposition.chatontop #playerandchat {
     flex-direction: column-reverse;
   }
-  .автоположениечата #чат-оболочка {
+  .chatautoposition #chat2-shell {
     width: 100%;
   }
-  .автоположениечата #размерчата {
+  .chatautoposition #chatsize {
     flex: 0 0 0.5rem;
     margin: -0.25rem 0;
     background: linear-gradient(
         to right,
-        rgba(var(--сЦветФона), var(--чНепрозрачность)),
-        rgba(var(--сЦветКнопок), var(--чНепрозрачность)),
-        rgba(var(--сЦветФона), var(--чНепрозрачность))
+        rgba(var(--sColorBackground), var(--nOpacity)),
+        rgba(var(--sColorButtons), var(--nOpacity)),
+        rgba(var(--sColorBackground), var(--nOpacity))
       )
       0% center/100% 0.125rem no-repeat;
     cursor: ns-resize;
@@ -338,7 +338,7 @@ body {
 }
 ::selection {
   color: #000;
-  background-color: rgba(var(--сЦветВыделения), 0.99);
+  background-color: rgba(var(--sColorHighlight), 0.99);
   text-shadow: none;
 }
 :focus {
@@ -351,8 +351,8 @@ hr {
   background: linear-gradient(
     to right,
     transparent,
-    rgb(var(--сЦветЗаголовка)) 30%,
-    rgb(var(--сЦветЗаголовка)) 70%,
+    rgb(var(--sColorHeader)) 30%,
+    rgb(var(--sColorHeader)) 70%,
     transparent
   );
 }
@@ -360,28 +360,28 @@ a {
   color: inherit;
 }
 a:hover {
-  color: rgb(var(--сЦветВыделения));
+  color: rgb(var(--sColorHighlight));
 }
-.горизвырав {
+.halign {
   display: flex;
   flex-shrink: 0;
 }
-.горизвырав-лево {
+.halign-left2 {
   flex: 1;
   text-align: left;
 }
-.горизвырав-середина {
+.halign-middle {
   flex: 1;
   text-align: center;
 }
-.горизвырав-право {
+.halign-right {
   flex: 1;
   text-align: right;
 }
-.метка.метка {
-  color: rgb(var(--сЦветЗаголовка));
+.label.label {
+  color: rgb(var(--sColorHeader));
 }
-#глаз {
+#eye {
   position: absolute;
   top: 0;
   left: 0;
@@ -391,10 +391,10 @@ a:hover {
   -webkit-user-select: none;
   user-select: none;
 }
-#глаз.масштабировать {
+#eye.scale2 {
   object-fit: contain;
 }
-#кадр {
+#frame2 {
   position: absolute;
   top: 0;
   left: 0;
@@ -404,10 +404,10 @@ a:hover {
   pointer-events: none;
   z-index: 1;
 }
-#кадр.масштабировать {
+#frame2.scale2 {
   object-fit: contain;
 }
-#субтитры {
+#subtitles {
   position: absolute;
   z-index: 4;
   left: 8%;
@@ -421,20 +421,20 @@ a:hover {
   white-space: pre-line;
   text-shadow: 0 0 0.2rem #000, 0 0.08rem 0.15rem #000;
 }
-#переключитьсубтитры {
+#togglesubtitles {
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.04em;
 }
-#переключитьсубтитры[aria-pressed="true"] {
-  color: rgb(var(--сЦветВыделения));
+#togglesubtitles[aria-pressed="true"] {
+  color: rgb(var(--sColorHighlight));
 }
-#задержка {
+#latency {
   font-variant-numeric: tabular-nums;
   opacity: 0.85;
   padding: 0 0.35rem;
 }
-.крутилка {
+.spinner {
   position: absolute;
   z-index: 1;
   top: 0;
@@ -446,24 +446,24 @@ a:hover {
   height: 5.375rem;
   border-radius: 8%;
   padding: 0.6875rem;
-  background: rgba(var(--сЦветФона), var(--чНепрозрачностьОкна));
-  box-shadow: inset 0 0.3125rem 0.625rem rgba(var(--сЦветГрадиента), 0.1);
-  animation: 0s step-end показатьнесразу;
+  background: rgba(var(--sColorBackground), var(--nOpacityWindow));
+  box-shadow: inset 0 0.3125rem 0.625rem rgba(var(--sColorGradient), 0.1);
+  animation: 0s step-end showNotImmediately;
 }
-body[data-состояние="4"] .крутилка,
-body[data-состояние="5"] .крутилка {
+body[data-state="4"] .spinner,
+body[data-state="5"] .spinner {
   animation-duration: 0.5s;
 }
-@keyframes показатьнесразу {
+@keyframes showNotImmediately {
   0% {
     opacity: 0;
   }
 }
-.анимацияинтерфейса .svg-busy {
+.uianimation .svg-busy {
   transform-origin: center;
-  animation: 2s cubic-bezier(0.46, 0.03, 0.52, 0.96) infinite загрузка;
+  animation: 2s cubic-bezier(0.46, 0.03, 0.52, 0.96) infinite load4;
 }
-@keyframes загрузка {
+@keyframes load4 {
   80% {
     transform: scaleX(1);
   }
@@ -471,7 +471,7 @@ body[data-состояние="5"] .крутилка {
     transform: scaleX(0);
   }
 }
-.панель {
+.panel2 {
   position: absolute;
   z-index: 3;
   left: 0;
@@ -482,109 +482,109 @@ body[data-состояние="5"] .крутилка {
   align-items: center;
   background: linear-gradient(
       to right,
-      rgba(var(--сЦветГрадиента), 0) 10%,
-      rgba(var(--сЦветГрадиента), 0.15) 40%,
-      rgba(var(--сЦветГрадиента), 0.15) 60%,
-      rgba(var(--сЦветГрадиента), 0) 90%
+      rgba(var(--sColorGradient), 0) 10%,
+      rgba(var(--sColorGradient), 0.15) 40%,
+      rgba(var(--sColorGradient), 0.15) 60%,
+      rgba(var(--sColorGradient), 0) 90%
     ),
-    rgba(var(--сЦветФона), var(--чНепрозрачность));
+    rgba(var(--sColorBackground), var(--nOpacity));
 }
-.автоскрытие:not([data-состояние="3"]):not([data-состояние="7"]):not([data-окно-открыто]):not(.выборскорости):not(
-    .нетвидео
+.autohide:not([data-state="3"]):not([data-state="7"]):not([data-window-open]):not(.speedchoice):not(
+    .novideo
   )
-  .панель {
+  .panel2 {
   pointer-events: none;
   visibility: hidden;
   opacity: 0;
 }
-.анимацияинтерфейса.анимацияпанели .панель {
+.uianimation.animationPanel .panel2 {
   transition: 0.3s ease-out;
   transition-property: visibility, opacity;
 }
-.верхняя {
+.top {
   top: 0;
 }
-.нижняя {
+.bottom {
   bottom: 0;
   font-size: 0.875rem;
 }
-.элементпанели {
+.panelitem {
   padding: 0 0.5rem;
   height: 100%;
   line-height: 2.125rem;
   display: flex;
   align-items: center;
 }
-.многоточие {
+.ellipsis {
   overflow: hidden;
   text-overflow: ellipsis;
   display: unset;
   min-width: calc(2.1em + 0.5rem * 2);
   text-decoration: none;
 }
-.можнотыкать:not(:disabled) {
+.clickable:not(:disabled) {
   cursor: pointer;
 }
-.можнотыкать:not(:disabled):not(select):hover {
-  color: rgb(var(--сЦветВыделения)) !important;
+.clickable:not(:disabled):not(select):hover {
+  color: rgb(var(--sColorHighlight)) !important;
 }
-.можнотыкать:not(:disabled):not(select):active {
+.clickable:not(:disabled):not(select):active {
   opacity: 0.9;
   text-shadow: none;
 }
-.пара {
+.pair {
   margin-left: calc(0.42em - 0.5rem * 2);
 }
-.заполнитель {
+.spacer {
   flex: 1 1000 0;
 }
-.кнопка {
+.button2 {
   flex: none;
   border-radius: 0;
   color: inherit;
   background: 0 0 !important;
 }
-.кнопка > svg {
+.button2 > svg {
   width: 1.375rem;
   height: 1.375rem;
 }
-.кнопка:enabled:active > svg {
+.button2:enabled:active > svg {
   transform: scale(0.85);
 }
-.типтрансляции {
+.broadcasttype {
   border-radius: 0.125rem;
   padding: 0.1875rem 0.25rem;
   font-size: 0.75rem;
   line-height: 1;
   text-shadow: none;
   color: #000;
-  background: rgb(var(--сЦветКнопок));
+  background: rgb(var(--sColorButtons));
 }
-.прямаятрансляция {
+.livestream {
   text-shadow: unset;
   color: #fff;
   background: #d00;
 }
-.категориятрансляции {
+.broadcastcategory {
   flex: 10000 1.5 12em;
   max-width: fit-content;
 }
-#громкость {
+#volume {
   flex: 0 1 8.125rem;
   min-width: 4.8125rem;
   font-size: 1rem;
   color: inherit;
   background: 0 0 !important;
 }
-#громкость::-webkit-slider-runnable-track {
+#volume::-webkit-slider-runnable-track {
   height: 0.25rem;
   border: 0;
   border-radius: 0.0625rem;
   background:
-    linear-gradient(to bottom, currentColor, currentColor) 0 0 / var(--ширина, 0%) 100% no-repeat,
-    rgba(var(--сЦветКнопок), 0.5);
+    linear-gradient(to bottom, currentColor, currentColor) 0 0 / var(--width, 0%) 100% no-repeat,
+    rgba(var(--sColorButtons), 0.5);
 }
-#громкость::-webkit-slider-thumb {
+#volume::-webkit-slider-thumb {
   -webkit-appearance: none;
   margin-top: -0.3125rem;
   width: 0.875rem;
@@ -594,57 +594,57 @@ body[data-состояние="5"] .крутилка {
   background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.25)), currentColor;
   box-shadow: 0 0 0.125rem #000;
 }
-.заполнитель.дляповтора {
+.spacer.forreplay {
   flex: 0 100 3.75rem;
 }
-#скорость {
+#speed {
   flex: none;
   line-height: unset;
   height: 1.375rem;
   margin: 0 0.5rem;
   color: #000;
-  background: rgb(var(--сЦветКнопок));
+  background: rgb(var(--sColorButtons));
   padding: 0 0.47em;
 }
-#скорость:not(:disabled):hover {
-  background-image: linear-gradient(to bottom, rgb(var(--сЦветВыделения)), rgb(var(--сЦветВыделения)));
+#speed:not(:disabled):hover {
+  background-image: linear-gradient(to bottom, rgb(var(--sColorHighlight)), rgb(var(--sColorHighlight)));
 }
-.проверкацветафон #проигрыватель {
+.colortestbg #player {
   background: repeating-linear-gradient(to right, #fff, #fff 5px, transparent 5px, transparent 10px),
     repeating-linear-gradient(to bottom, #fff, #fff 5px, transparent 5px, transparent 10px), #000;
 }
-body[data-состояние="6"]:not(.нетвидео):not(.проверкацвета) .крутилка,
-body[data-состояние="8"]:not(.нетвидео):not(.проверкацвета) .крутилка,
-body:not([data-состояние="1"]):not([data-состояние="2"]):not([data-состояние="4"]):not([data-состояние="5"]) .svg-busy,
-body:not([data-состояние="3"]) .svg-end,
-body:not([data-состояние="7"]) .svg-stop,
-body:not([data-состояние="6"]):not([data-состояние="8"]) .svg-mute-false,
-body:not(.нетвидео) .svg-mute-false,
-body:not(.проверкацвета) .svg-settings,
-.проверкацвета .крутилка > use:not(.svg-settings),
-.проверкацветафон #глаз,
-body[data-состояние="8"] .недляповтора,
-body:not([data-состояние="8"]) .дляповтора,
-.нетвидео #переключитькартинкавкартинке,
-.нетзвука #переключитьприглушить,
-.нетзвука #громкость {
+body[data-state="6"]:not(.novideo):not(.colortest) .spinner,
+body[data-state="8"]:not(.novideo):not(.colortest) .spinner,
+body:not([data-state="1"]):not([data-state="2"]):not([data-state="4"]):not([data-state="5"]) .svg-busy,
+body:not([data-state="3"]) .svg-end,
+body:not([data-state="7"]) .svg-stop,
+body:not([data-state="6"]):not([data-state="8"]) .svg-mute-false,
+body:not(.novideo) .svg-mute-false,
+body:not(.colortest) .svg-settings,
+.colortest .spinner > use:not(.svg-settings),
+.colortestbg #eye,
+body[data-state="8"] .notreplay,
+body:not([data-state="8"]) .forreplay,
+.novideo #togglepip,
+.noaudio #togglemute,
+.noaudio #volume {
   display: none;
 }
-#шкала {
+#scale {
   flex: 1 3 25rem;
   min-width: 6rem;
 }
-.шкала-фон {
+.scale-background {
   flex: 1;
   height: 0.75rem;
-  background: rgba(var(--сЦветКнопок), 0.3);
+  background: rgba(var(--sColorButtons), 0.3);
 }
-#шкала-просмотрено {
+#scale-watched {
   background: currentColor;
   height: 100%;
   transform-origin: 0;
 }
-#уведомление {
+#notice {
   position: absolute;
   top: calc(1.25rem + 2.125rem);
   right: calc(1.25rem + 2.125rem);
@@ -653,19 +653,19 @@ body:not([data-состояние="8"]) .дляповтора,
   border: 0.15rem solid rgba(255, 255, 255, 0.35);
   border-radius: 8%;
   padding: 0.625rem;
-  color: rgb(var(--сЦветВыделения));
-  background: rgb(var(--сЦветФона));
+  color: rgb(var(--sColorHighlight));
+  background: rgb(var(--sColorBackground));
   z-index: 9;
 }
-#уведомление.жопа {
+#notice.fail {
   border-color: #fcc;
   color: #fff;
   background: red;
 }
-.анимацияинтерфейса #уведомление {
-  animation: 0.3s cubic-bezier(0.17, 0.84, 0.44, 1) уведомление;
+.uianimation #notice {
+  animation: 0.3s cubic-bezier(0.17, 0.84, 0.44, 1) notice;
 }
-@keyframes уведомление {
+@keyframes notice {
   0% {
     transform: scale(1.5);
   }
@@ -673,41 +673,41 @@ body:not([data-состояние="8"]) .дляповтора,
     transform: none;
   }
 }
-.обновлениерасширения {
+.extensionupdate {
   left: 0;
   bottom: 2.125rem;
   max-width: 38em;
 }
-.обновлениерасширения-закрыть {
+.extensionupdate-close {
   float: right;
   margin-left: 0.5rem;
   padding-left: 0;
   padding-right: 0;
   width: 3.217ex;
 }
-.обновлениерасширения p {
+.extensionupdate p {
   margin: 0;
   white-space: normal;
 }
-.обновлениерасширения strong {
+.extensionupdate strong {
   font-weight: inherit;
-  color: rgb(var(--сЦветЗаголовка));
+  color: rgb(var(--sColorHeader));
 }
-.скрытиерекламы {
+.hidingads {
   position: absolute;
   top: calc(1.25rem + 2.125rem);
   left: calc(1.25rem);
   border: 0.125rem solid rgba(255, 255, 255, 0.3);
   border-radius: 0.125rem;
   padding: 0.5rem 0.625rem;
-  color: rgb(var(--сЦветВыделения));
-  background: rgba(var(--сЦветФона), 0.8);
+  color: rgb(var(--sColorHighlight));
+  background: rgba(var(--sColorBackground), 0.8);
   z-index: 5;
 }
-.анимацияинтерфейса .скрытиерекламы-текст {
-  animation: 2s linear infinite реклама;
+.uianimation .hidingads-text {
+  animation: 2s linear infinite ad;
 }
-@keyframes реклама {
+@keyframes ad {
   70% {
     opacity: 1;
   }
@@ -715,53 +715,53 @@ body:not([data-состояние="8"]) .дляповтора,
     opacity: 0;
   }
 }
-body:not(.реклама) .скрытиерекламы {
+body:not(.ad) .hidingads {
   display: none;
 }
-.канал {
+.channel2 {
   right: 0;
   top: 2.125rem;
   max-width: 45em;
 }
-.канал table {
+.channel2 table {
   border-spacing: 0;
 }
-.канал th {
+.channel2 th {
   width: 0.0625rem;
   padding-right: 1em;
   font: inherit;
   text-align: right;
   vertical-align: top;
 }
-.канал td {
+.channel2 td {
   white-space: normal;
   vertical-align: middle;
 }
-.канал hr {
+.channel2 hr {
   margin: 0.5em 0;
 }
-th.канал-аватар {
+th.channel2-avatar {
   vertical-align: middle;
 }
-.канал-аватар > img {
+.channel2-avatar > img {
   width: 5rem;
   height: 5rem;
 }
-#канал-имя {
+#channel2-name {
   font-size: 1.2em;
   font-weight: bolder;
   line-height: 1;
   margin-bottom: 0.4em;
 }
-.канал-ссылка[title]:not(:hover) {
+.channel2-link2[title]:not(:hover) {
   text-decoration-style: dotted;
 }
-.канал-статы {
+.channel2-stats2 {
   display: flex;
   gap: 0.5em;
   margin-top: 0.15em;
 }
-.канал-статы > a {
+.channel2-stats2 > a {
   flex: 1 1 0;
   box-sizing: border-box;
   border-radius: 0.125rem;
@@ -775,26 +775,26 @@ th.канал-аватар {
   color: #111;
   background: linear-gradient(to bottom, #fff, #f2f2f2 40%, #e0e0e0 60%, #b3b3b3);
 }
-.канал-статы > a:active {
+.channel2-stats2 > a:active {
   background: linear-gradient(to bottom, #b3b3b3, #d9d9d9 40%, #e6e6e6);
 }
-#зритель-подписаться,
-#зритель-отписаться {
+#viewer-follow2,
+#viewer-unfollow {
   min-width: 100%;
 }
-.обновляется {
+.updating {
   pointer-events: none;
 }
-.зритель-уведомлять {
+.viewer-notify {
   margin-right: 1em;
 }
-#зритель-подписка[data-подписка="0"],
-#зритель-подписка:not([data-подписка="1"]) #зритель-подписаться,
-#зритель-подписка:not([data-подписка="2"]):not([data-подписка="3"]) #зритель-отписаться,
-#зритель-подписка:not([data-подписка="2"]):not([data-подписка="3"]) .зритель-уведомлять {
+#viewer-follow[data-follow="0"],
+#viewer-follow:not([data-follow="1"]) #viewer-follow2,
+#viewer-follow:not([data-follow="2"]):not([data-follow="3"]) #viewer-unfollow,
+#viewer-follow:not([data-follow="2"]):not([data-follow="3"]) .viewer-notify {
   display: none;
 }
-.главноеменю {
+.mainmenu {
   right: 2.625rem;
   bottom: 2.125rem;
   padding: 0.625rem 0;
@@ -802,10 +802,10 @@ th.канал-аватар {
   flex-flow: column;
   align-items: stretch;
 }
-.меню-секция {
+.menu-section {
   padding: 0 0.625rem;
 }
-.меню-пункт {
+.menu-item {
   position: relative;
   margin: 0;
   border: 0;
@@ -815,16 +815,16 @@ th.канал-аватар {
   text-decoration: none;
   cursor: pointer;
 }
-.меню-пункт:hover {
+.menu-item:hover {
   text-shadow: none;
   color: #222;
-  background: rgb(var(--сЦветВыделения));
+  background: rgb(var(--sColorHighlight));
 }
-.меню-пункт[tabindex="-1"] {
+.menu-item[tabindex="-1"] {
   opacity: 0.4;
   pointer-events: none;
 }
-.меню-значок {
+.menu-icon {
   position: absolute;
   left: 0.125rem;
   top: 0.1875rem;
@@ -832,44 +832,44 @@ th.канал-аватар {
   height: 1.125rem;
   pointer-events: none;
 }
-.меню-текст {
+.menu-text {
   pointer-events: none;
 }
-.меню-клавиши {
+.menu-keys {
   margin-left: 1.5em;
-  color: rgb(var(--сЦветЗаголовка));
+  color: rgb(var(--sColorHeader));
   pointer-events: none;
 }
-.меню-пункт:hover .меню-клавиши {
+.menu-item:hover .menu-keys {
   color: inherit;
   opacity: 0.7;
 }
-.поддержать {
-  color: rgb(var(--сЦветВыделения));
+.support {
+  color: rgb(var(--sColorHighlight));
 }
-.ужатьглавноеменю .главноеменю {
+.compressmainmenu .mainmenu {
   flex-flow: row;
   right: 0;
 }
-.ужатьглавноеменю .меню-секция:first-child {
+.compressmainmenu .menu-section:first-child {
   border-right: 1px solid;
   border-image: linear-gradient(
       to bottom,
       transparent,
-      rgb(var(--сЦветЗаголовка)) 30%,
-      rgb(var(--сЦветЗаголовка)) 70%,
+      rgb(var(--sColorHeader)) 30%,
+      rgb(var(--sColorHeader)) 70%,
       transparent
     )
     1;
 }
-.ужатьглавноеменю .главноеменю hr:first-child {
+.compressmainmenu .mainmenu hr:first-child {
   display: none;
 }
-.настройки {
+.settings {
   right: 0;
   bottom: 2.125rem;
 }
-.заголовокнастроек {
+.settingsheader {
   display: block;
   margin-top: 0.3125rem;
   border-radius: 0.125rem;
@@ -880,72 +880,72 @@ th.канал-аватар {
   text-transform: uppercase;
   letter-spacing: 0.0625rem;
   font-size: 0.8334em;
-  background: rgb(var(--сЦветКнопок));
+  background: rgb(var(--sColorButtons));
   cursor: pointer;
 }
-.заголовокнастроек:first-of-type {
+.settingsheader:first-of-type {
   margin-top: 0;
 }
-input:checked + .заголовокнастроек {
-  background: rgb(var(--сЦветВыделения));
+input:checked + .settingsheader {
+  background: rgb(var(--sColorHighlight));
   cursor: default;
 }
-.группанастроек {
+.settingsgroup {
   height: 16.667em;
   overflow: hidden;
 }
-input:not(:checked) + .заголовокнастроек + .группанастроек {
+input:not(:checked) + .settingsheader + .settingsgroup {
   height: 0;
 }
-.анимацияинтерфейса .заголовокнастроек,
-.анимацияинтерфейса .группанастроек {
+.uianimation .settingsheader,
+.uianimation .settingsgroup {
   transition: 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
   transition-property: background-color, height;
 }
-.настройка {
+.setting {
   display: flex;
   justify-content: flex-end;
   align-items: center;
   margin: 0.5rem 0 0;
 }
-.настройка-имя {
+.setting-name {
   flex: 1;
   margin-right: 2em;
-  color: rgb(var(--сЦветЗаголовка));
+  color: rgb(var(--sColorHeader));
 }
-.настройка-данные {
+.setting-data {
   color: #fff;
 }
-.настройка-данные input[type="color"],
-.настройка-данные button,
-.настройка-данные select {
+.setting-data input[type="color"],
+.setting-data button,
+.setting-data select {
   min-width: 11.2em;
   max-width: 16em;
 }
-.вводчисла-число.вводчисла-число {
+.inputNumber-number.inputNumber-number {
   min-width: 5.2em;
   max-width: 5.2em;
   text-align: right;
 }
-.вводчисла-минус.вводчисла-минус,
-.вводчисла-плюс.вводчисла-плюс {
+.inputNumber-minus.inputNumber-minus,
+.inputNumber-plus.inputNumber-plus {
   min-width: 3em;
 }
-.вводчисла-минус {
+.inputNumber-minus {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
   border-right-width: 1px;
   border-right-style: solid;
   border-right-color: rgba(0, 0, 0, 0.12);
 }
-.вводчисла-плюс {
+.inputNumber-plus {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
   border-left-width: 1px;
   border-left-style: solid;
   border-left-color: rgba(0, 0, 0, 0.12);
 }
-.положениечата {
+.chatposition {
   position: relative;
   width: 4em;
   height: 4em;
@@ -953,103 +953,103 @@ input:not(:checked) + .заголовокнастроек + .группанас�
   margin-left: 1em;
   vertical-align: middle;
 }
-.положениечата > label:nth-child(1) {
+.chatposition > label:nth-child(1) {
   position: absolute;
   left: 0;
   top: 50%;
   transform: translateY(-50%);
 }
-.положениечата > label:nth-child(2) {
+.chatposition > label:nth-child(2) {
   position: absolute;
   top: 0;
   left: 50%;
   transform: translateX(-50%);
   margin: 0;
 }
-.положениечата > label:nth-child(3) {
+.chatposition > label:nth-child(3) {
   position: absolute;
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
   margin: 0;
 }
-.положениечата > label:nth-child(4) {
+.chatposition > label:nth-child(4) {
   position: absolute;
   right: 0;
   top: 50%;
   transform: translateY(-50%);
   margin: 0;
 }
-.ужатьнастройки .заголовокнастроек {
+.compresssettings .settingsheader {
   margin-top: 2px;
   padding: 0.0625rem 0;
 }
-.ужатьнастройки .группанастроек {
+.compresssettings .settingsgroup {
   height: 14.917em;
 }
-.ужатьнастройки .настройка {
+.compresssettings .setting {
   margin-top: 0.3125rem;
 }
-.новости {
+.news2 {
   right: 0;
   bottom: 2.125rem;
   display: flex;
   flex-direction: column;
   max-height: calc(100% - 2.125rem * 2 - 0.25rem * 2);
 }
-.новости-текст {
+.news2-text {
   max-width: 42em;
   overflow: auto;
   margin-bottom: 1em;
   padding-right: 0.3em;
   white-space: normal;
 }
-.новости-текст > h4 {
+.news2-text > h4 {
   display: flex;
   justify-content: space-between;
-  color: rgb(var(--сЦветЗаголовка));
+  color: rgb(var(--sColorHeader));
 }
-.новость-перевести {
+.news-convert {
   flex: 0 0 1.5em;
   margin: 0 0.4em 0 1em;
   background: url(translate.svg) no-repeat;
 }
-.новость-перевести:not(:hover) {
+.news-convert:not(:hover) {
   opacity: 0.8;
 }
-.новости-текст > h4,
-.новости-текст > p,
-.новости-текст ol,
-.новости-текст ul {
+.news2-text > h4,
+.news2-text > p,
+.news2-text ol,
+.news2-text ul {
   margin: 1em 0;
 }
-.новости-текст > h4:first-child,
-.новости-текст > p:last-child {
+.news2-text > h4:first-child,
+.news2-text > p:last-child {
   margin: 0;
 }
-.новости-текст ol,
-.новости-текст ul {
+.news2-text ol,
+.news2-text ul {
   padding-left: 1.5em;
 }
-.новости-текст b {
+.news2-text b {
   font-weight: inherit;
-  color: rgb(var(--сЦветЗаголовка));
+  color: rgb(var(--sColorHeader));
 }
-#открытьновости {
-  color: rgb(var(--сЦветВыделения));
+#opennews {
+  color: rgb(var(--sColorHighlight));
 }
-.непрочитано > svg {
+.unread > svg {
   transform-origin: 50% 10%;
-  animation: 12.5s linear 0.5s infinite непрочитано;
+  animation: 12.5s linear 0.5s infinite unread;
 }
-.автоскрытие:not([data-состояние="3"]):not([data-состояние="7"]):not([data-окно-открыто]):not(.выборскорости):not(
-    .нетвидео
+.autohide:not([data-state="3"]):not([data-state="7"]):not([data-window-open]):not(.speedchoice):not(
+    .novideo
   )
-  .непрочитано
+  .unread
   > svg {
   animation: none;
 }
-@keyframes непрочитано {
+@keyframes unread {
   .6%,
   3%,
   5.4%,
@@ -1088,7 +1088,7 @@ input:not(:checked) + .заголовокнастроек + .группанас�
     transform: none;
   }
 }
-#статистика {
+#stats {
   position: absolute;
   z-index: 2;
   top: var(--y, 2.125rem);
@@ -1106,122 +1106,122 @@ input:not(:checked) + .заголовокнастроек + .группанас�
   color: #fff;
   background: rgba(0, 0, 0, 0.6);
 }
-#статистика.тащилка {
+#stats.draghandle {
   outline: 0.0625rem solid #476685;
 }
-#статистика:not(.тащилка):hover {
+#stats:not(.draghandle):hover {
   background: #000;
 }
-#статистика.тащилка,
-#статистика:hover {
+#stats.draghandle,
+#stats:hover {
   z-index: 10;
   min-width: 36em;
   max-width: calc(100% - var(--x, 0px));
 }
-#статистика:not(.тащилка):not(:hover) .статистика-подробно {
+#stats:not(.draghandle):not(:hover) .stats-detailed {
   display: none;
 }
-.статистика-кнопка {
+.stats-button2 {
   position: absolute;
   top: 0;
   padding: 0.5rem 0.3125rem;
 }
-.статистика-кнопка > svg {
+.stats-button2 > svg {
   width: 1.2rem;
   height: 1.2rem;
 }
-#закрытьстатистику {
+#closestats {
   left: 0;
   cursor: pointer;
 }
-.статистика-переместить {
+.stats-move {
   left: 1.825rem;
   cursor: move;
 }
-th[data-тащилка="статистика"] {
+th[data-draghandle="stats"] {
   cursor: move;
 }
-.статистика-прокрутка {
+.stats-scroll {
   overflow: auto;
   padding: 0.5em;
 }
-.статистика-главнаятаблица {
+.stats-maintable {
   border-spacing: 0;
 }
-.статистика-главнаятаблица > tbody > tr > th {
+.stats-maintable > tbody > tr > th {
   border-right: 1px solid #777;
   padding: 0 0.5em 0 0;
   font: inherit;
   text-align: right;
   color: #b0c5ee;
 }
-.статистика-главнаятаблица > tbody > tr > td {
+.stats-maintable > tbody > tr > td {
   padding: 0;
 }
-.статистика-главнаятаблица > tbody > tr > th + td {
+.stats-maintable > tbody > tr > th + td {
   padding-left: 0.5em;
 }
-.статистика-символ {
+.stats-char {
   font:
     1.2em/1 Calibri,
     Arial,
     sans-serif;
   color: #b7b7b7;
 }
-.статистика-выделить {
+.stats-highlight {
   font-weight: 700;
   color: #ff6;
 }
-.статистика-анализ {
+.stats-analysis {
   border-spacing: 0.0625rem 0;
   text-align: right;
 }
-.статистика-анализ td {
+.stats-analysis td {
   border: 0.0625rem solid transparent;
   padding: 0;
 }
-.статистика-анализ > tbody > tr:not(:last-child) > td {
+.stats-analysis > tbody > tr:not(:last-child) > td {
   border-bottom: 0;
 }
-.статистика-анализ > tbody > tr:not(:first-child) > td {
+.stats-analysis > tbody > tr:not(:first-child) > td {
   border-top: 0;
 }
-.анализ-минимум,
-.анализ-среднее,
-.анализ-максимум,
-#статистика:not(.тащилка):not(:hover) .анализ-история:not(.статистика-подробно) {
+.analysis-minimum,
+.analysis-average,
+.analysis-maximum,
+#stats:not(.draghandle):not(:hover) .analysis-history:not(.stats-detailed) {
   box-sizing: content-box;
   min-width: 2.05em;
 }
-.анализ-максимум.анализ-максимум {
+.analysis-maximum.analysis-maximum {
   padding-right: 0.5em;
 }
-.анализ-история.анализ-история {
+.analysis-history.analysis-history {
   border-color: #777;
   padding: 0 0.125rem;
 }
-.анализ-история:not(.статистика-подробно) {
+.analysis-history:not(.stats-detailed) {
   border-color: #f40;
 }
-.анализ-история:empty {
+.analysis-history:empty {
   display: none;
 }
-html.темасветлая #проигрывательичат {
+html.lighttheme #playerandchat {
   text-shadow: none;
 }
-html.темасветлая .заголовокнастроек {
+html.lighttheme .settingsheader {
   color: #fff;
   text-shadow: none;
 }
-html.темасветлая .настройка-данные {
-  color: rgb(var(--сЦветКнопок));
+html.lighttheme .setting-data {
+  color: rgb(var(--sColorButtons));
 }
-html.темасветлая .меню {
+html.lighttheme .menu {
   text-shadow: none;
 }
-html.темасветлая .меню-пункт {
+html.lighttheme .menu-item {
   text-shadow: none;
 }
-html.темасветлая .панель {
+html.lighttheme .panel2 {
   text-shadow: none;
 }

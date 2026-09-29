@@ -1,6 +1,6 @@
 (() => {
 	'use strict';
-	const _оСвойства = {
+	const _oProperty = {
 		pointerId: 0,
 		width: 1,
 		height: 1,
@@ -13,106 +13,106 @@
 		isPrimary: false
 	};
 	class PointerEvent extends MouseEvent {
-		constructor(сТипСобытия, оПараметры = {}) {
-			super(сТипСобытия, оПараметры);
-			const оОпределениеСвойства = {
+		constructor(sTypeEvent, oParameters = {}) {
+			super(sTypeEvent, oParameters);
+			const oDefinitionProperty = {
 				enumerable: true,
 				configurable: true
 			};
-			for (const сИмя of Object.keys(_оСвойства)) {
-				if (сИмя in оПараметры) {
-					if (typeof оПараметры[сИмя] != typeof _оСвойства[сИмя] || Number.isNaN(оПараметры[сИмя])) {
-						throw new TypeError(`В конструктор PointerEvent передан параметр ${сИмя} недопустимого типа`);
+			for (const sName of Object.keys(_oProperty)) {
+				if (sName in oParameters) {
+					if (typeof oParameters[sName] != typeof _oProperty[sName] || Number.isNaN(oParameters[sName])) {
+						throw new TypeError(`IN constructor PointerEvent passed2 parameter ${sName} invalid type`);
 					}
-					оОпределениеСвойства.value = оПараметры[сИмя];
+					oDefinitionProperty.value = oParameters[sName];
 				} else {
-					оОпределениеСвойства.value = _оСвойства[сИмя];
+					oDefinitionProperty.value = _oProperty[sName];
 				}
-				Object.defineProperty(this, сИмя, оОпределениеСвойства);
+				Object.defineProperty(this, sName, oDefinitionProperty);
 			}
 		}
 	}
-	let _лЗадерживатьСообщенияМыши = false;
-	function СоздатьИПослатьСобытиеУказателяДляМыши(оСобытиеМыши, сТипСобытия, button) {
-		const оПараметры = {};
-		оПараметры.bubbles = оСобытиеМыши.bubbles;
-		оПараметры.cancelable = оСобытиеМыши.cancelable;
-		оПараметры.composed = true;
-		оПараметры.view = оСобытиеМыши.view;
-		оПараметры.ctrlKey = оСобытиеМыши.ctrlKey;
-		оПараметры.shiftKey = оСобытиеМыши.shiftKey;
-		оПараметры.altKey = оСобытиеМыши.altKey;
-		оПараметры.metaKey = оСобытиеМыши.metaKey;
-		оПараметры.modifierAltGraph = оСобытиеМыши.getModifierState('AltGraph');
-		оПараметры.modifierCapsLock = оСобытиеМыши.getModifierState('CapsLock');
-		оПараметры.modifierNumLock = оСобытиеМыши.getModifierState('NumLock');
-		оПараметры.modifierScrollLock = оСобытиеМыши.getModifierState('ScrollLock');
-		оПараметры.screenX = оСобытиеМыши.screenX;
-		оПараметры.screenY = оСобытиеМыши.screenY;
-		оПараметры.clientX = оСобытиеМыши.clientX;
-		оПараметры.clientY = оСобытиеМыши.clientY;
-		оПараметры.button = button;
-		оПараметры.buttons = оСобытиеМыши.buttons;
-		оПараметры.relatedTarget = оСобытиеМыши.relatedTarget;
-		оПараметры.pressure = оПараметры.buttons === 0 ? 0 : .5;
-		оПараметры.pointerType = 'mouse';
-		оПараметры.isPrimary = true;
-		const оСобытиеУказателя = new PointerEvent(сТипСобытия, оПараметры);
-		Object.defineProperty(оСобытиеУказателя, 'timeStamp', {
+	let _isDelayMessageMouse = false;
+	function CreateAndDispatchEventPointerForMouse(oEventMouse, sTypeEvent, button) {
+		const oParameters = {};
+		oParameters.bubbles = oEventMouse.bubbles;
+		oParameters.cancelable = oEventMouse.cancelable;
+		oParameters.composed = true;
+		oParameters.view = oEventMouse.view;
+		oParameters.ctrlKey = oEventMouse.ctrlKey;
+		oParameters.shiftKey = oEventMouse.shiftKey;
+		oParameters.altKey = oEventMouse.altKey;
+		oParameters.metaKey = oEventMouse.metaKey;
+		oParameters.modifierAltGraph = oEventMouse.getModifierState('AltGraph');
+		oParameters.modifierCapsLock = oEventMouse.getModifierState('CapsLock');
+		oParameters.modifierNumLock = oEventMouse.getModifierState('NumLock');
+		oParameters.modifierScrollLock = oEventMouse.getModifierState('ScrollLock');
+		oParameters.screenX = oEventMouse.screenX;
+		oParameters.screenY = oEventMouse.screenY;
+		oParameters.clientX = oEventMouse.clientX;
+		oParameters.clientY = oEventMouse.clientY;
+		oParameters.button = button;
+		oParameters.buttons = oEventMouse.buttons;
+		oParameters.relatedTarget = oEventMouse.relatedTarget;
+		oParameters.pressure = oParameters.buttons === 0 ? 0 : .5;
+		oParameters.pointerType = 'mouse';
+		oParameters.isPrimary = true;
+		const oEventPointer = new PointerEvent(sTypeEvent, oParameters);
+		Object.defineProperty(oEventPointer, 'timeStamp', {
 			enumerable: true,
 			configurable: true,
-			value: оСобытиеМыши.timeStamp
+			value: oEventMouse.timeStamp
 		});
-		const лОтменено = !оСобытиеМыши.target.dispatchEvent(оСобытиеУказателя);
-		if (лОтменено) {
-			оСобытиеМыши.preventDefault();
+		const isCancelled = !oEventMouse.target.dispatchEvent(oEventPointer);
+		if (isCancelled) {
+			oEventMouse.preventDefault();
 		}
-		return лОтменено;
+		return isCancelled;
 	}
-	const ОбработатьMouseDown = ДобавитьОбработчикИсключений(оСобытиеМыши => {
-		if ((оСобытиеМыши.buttons & оСобытиеМыши.buttons - 1) == 0) {
-			_лЗадерживатьСообщенияМыши = СоздатьИПослатьСобытиеУказателяДляМыши(оСобытиеМыши, 'pointerdown', оСобытиеМыши.button);
+	const HandleMouseDown = AddHandlerExceptions(oEventMouse => {
+		if ((oEventMouse.buttons & oEventMouse.buttons - 1) == 0) {
+			_isDelayMessageMouse = CreateAndDispatchEventPointerForMouse(oEventMouse, 'pointerdown', oEventMouse.button);
 		} else {
-			СоздатьИПослатьСобытиеУказателяДляМыши(оСобытиеМыши, 'pointermove', оСобытиеМыши.button);
+			CreateAndDispatchEventPointerForMouse(oEventMouse, 'pointermove', oEventMouse.button);
 		}
-		if (_лЗадерживатьСообщенияМыши) {
-			оСобытиеМыши.stopImmediatePropagation();
-		}
-	});
-	const ОбработатьMouseMove = ДобавитьОбработчикИсключений(оСобытиеМыши => {
-		СоздатьИПослатьСобытиеУказателяДляМыши(оСобытиеМыши, 'pointermove', -1);
-		if (_лЗадерживатьСообщенияМыши) {
-			оСобытиеМыши.stopImmediatePropagation();
+		if (_isDelayMessageMouse) {
+			oEventMouse.stopImmediatePropagation();
 		}
 	});
-	const ОбработатьMouseUp = ДобавитьОбработчикИсключений(оСобытиеМыши => {
-		if (оСобытиеМыши.buttons === 0) {
-			СоздатьИПослатьСобытиеУказателяДляМыши(оСобытиеМыши, 'pointerup', оСобытиеМыши.button);
+	const HandleMouseMove = AddHandlerExceptions(oEventMouse => {
+		CreateAndDispatchEventPointerForMouse(oEventMouse, 'pointermove', -1);
+		if (_isDelayMessageMouse) {
+			oEventMouse.stopImmediatePropagation();
+		}
+	});
+	const HandleMouseUp = AddHandlerExceptions(oEventMouse => {
+		if (oEventMouse.buttons === 0) {
+			CreateAndDispatchEventPointerForMouse(oEventMouse, 'pointerup', oEventMouse.button);
 		} else {
-			СоздатьИПослатьСобытиеУказателяДляМыши(оСобытиеМыши, 'pointermove', оСобытиеМыши.button);
+			CreateAndDispatchEventPointerForMouse(oEventMouse, 'pointermove', oEventMouse.button);
 		}
-		if (_лЗадерживатьСообщенияМыши) {
-			оСобытиеМыши.stopImmediatePropagation();
+		if (_isDelayMessageMouse) {
+			oEventMouse.stopImmediatePropagation();
 		}
-		if (оСобытиеМыши.buttons === 0) {
-			_лЗадерживатьСообщенияМыши = false;
+		if (oEventMouse.buttons === 0) {
+			_isDelayMessageMouse = false;
 		}
 	});
-	const ОбработатьMouseOver = ДобавитьОбработчикИсключений(оСобытиеМыши => {
-		СоздатьИПослатьСобытиеУказателяДляМыши(оСобытиеМыши, 'pointerover', -1);
+	const HandleMouseOver = AddHandlerExceptions(oEventMouse => {
+		CreateAndDispatchEventPointerForMouse(oEventMouse, 'pointerover', -1);
 	});
-	const ОбработатьMouseOut = ДобавитьОбработчикИсключений(оСобытиеМыши => {
-		СоздатьИПослатьСобытиеУказателяДляМыши(оСобытиеМыши, 'pointerout', -1);
+	const HandleMouseOut = AddHandlerExceptions(oEventMouse => {
+		CreateAndDispatchEventPointerForMouse(oEventMouse, 'pointerout', -1);
 	});
 	Object.defineProperty(window, 'PointerEvent', {
 		writable: true,
 		configurable: true,
 		value: PointerEvent
 	});
-	м_Журнал.Ой('[PointerEvent] Использую события мыши');
-	window.addEventListener('mousedown', ОбработатьMouseDown, true);
-	window.addEventListener('mousemove', ОбработатьMouseMove, true);
-	window.addEventListener('mouseup', ОбработатьMouseUp, true);
-	window.addEventListener('mouseover', ОбработатьMouseOver, true);
-	window.addEventListener('mouseout', ОбработатьMouseOut, true);
+	m_Log.Oops('[PointerEvent] Using event2 mouse');
+	window.addEventListener('mousedown', HandleMouseDown, true);
+	window.addEventListener('mousemove', HandleMouseMove, true);
+	window.addEventListener('mouseup', HandleMouseUp, true);
+	window.addEventListener('mouseover', HandleMouseOver, true);
+	window.addEventListener('mouseout', HandleMouseOut, true);
 })();
