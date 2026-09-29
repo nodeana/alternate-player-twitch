@@ -64,29 +64,66 @@ select {
   background-position: right;
   background-repeat: no-repeat;
 }
+.radio-label {
+  cursor: pointer;
+}
 .radio-label + .radio-label {
   margin-left: 1em;
 }
 .radio-icon,
 .checkbox-icon {
+  position: relative;
   display: inline-block;
-  width: 1.4167em;
-  height: 1.4167em;
+  box-sizing: border-box;
+  width: 1.15em;
+  height: 1.15em;
   vertical-align: middle;
-  background: url(player.svg#radio0) center no-repeat;
+  border-radius: 0.28rem;
+  background: rgba(var(--sColorButtons), 0.12);
+  box-shadow: inset 0 0 0 1.5px rgba(var(--sColorButtons), 0.7);
+  cursor: pointer;
 }
-.checkbox-icon {
-  background-image: url(player.svg#checkbox0);
+.radio-icon {
+  border-radius: 50%;
 }
-input:checked + .radio-icon {
-  background-image: url(player.svg#radio1);
+.radio-label:hover .radio-icon,
+.radio-label:hover .checkbox-icon {
+  box-shadow: inset 0 0 0 1.5px rgb(var(--sColorHighlight));
 }
 input:checked + .checkbox-icon {
-  background-image: url(player.svg#checkbox1);
+  background-color: rgb(var(--sColorHighlight));
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.2 8.3 6.3 11.4 12.8 4.7' fill='none' stroke='%23000' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M3.2 8.3 6.3 11.4 12.8 4.7' fill='none' stroke='%23fff' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 74% 74%;
+  box-shadow: none;
+}
+input:checked + .radio-icon {
+  background: rgb(var(--sColorHighlight));
+  box-shadow: none;
+}
+.radio-label:hover input:checked + .checkbox-icon,
+.radio-label:hover input:checked + .radio-icon {
+  box-shadow: none;
+}
+input:checked + .radio-icon::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 0.4em;
+  height: 0.4em;
+  margin: auto;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 1px #111;
 }
 .radio-text {
   margin-left: 0.25em;
   vertical-align: middle;
+  cursor: pointer;
 }
 kbd {
   font: inherit;
@@ -801,28 +838,27 @@ th.channel2-avatar {
 .channel2-stats2 > a {
   flex: 1 1 0;
   box-sizing: border-box;
-  border-radius: 0.125rem;
-  padding: 0 0.5em;
+  border-radius: 0.4rem;
+  padding: 0 0.75em;
   height: 3.217ex;
   font:
-    400 0.75rem/3.217ex Arial,
+    600 0.75rem/3.217ex Arial,
     Helvetica,
     sans-serif;
   text-align: center;
   text-decoration: none;
   text-shadow: none;
   white-space: nowrap;
-  color: #111;
-  background: linear-gradient(
-    to bottom,
-    #fff,
-    #f2f2f2 40%,
-    #e0e0e0 60%,
-    #b3b3b3
-  );
+  color: rgb(var(--sColorButtons));
+  background-color: rgba(var(--sColorButtons), 0.16);
+  box-shadow: inset 0 0 0 1px rgba(var(--sColorButtons), 0.42);
+}
+.channel2-stats2 > a:hover {
+  background-color: rgba(var(--sColorHighlight), 0.28);
+  box-shadow: inset 0 0 0 1px rgb(var(--sColorHighlight));
 }
 .channel2-stats2 > a:active {
-  background: linear-gradient(to bottom, #b3b3b3, #d9d9d9 40%, #e6e6e6);
+  background-color: rgba(var(--sColorHighlight), 0.45);
 }
 #viewer-follow2,
 #viewer-unfollow {
@@ -967,6 +1003,94 @@ input:not(:checked) + .settingsheader + .settingsgroup {
 .setting-data select {
   min-width: 11.2em;
   max-width: 16em;
+}
+.window button,
+.window select {
+  border-radius: 0.4rem;
+  padding: 0 0.75em;
+  color: rgb(var(--sColorButtons));
+  background-color: rgba(var(--sColorButtons), 0.16);
+  background-image: none;
+  box-shadow: inset 0 0 0 1px rgba(var(--sColorButtons), 0.42);
+  text-shadow: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+.window button:enabled:hover,
+.window button:enabled:active {
+  background-image: none;
+}
+.window button:enabled:hover,
+.window select:enabled:hover {
+  background-color: rgba(var(--sColorHighlight), 0.28);
+  box-shadow: inset 0 0 0 1px rgb(var(--sColorHighlight));
+}
+.window button:enabled:active {
+  background-color: rgba(var(--sColorHighlight), 0.45);
+}
+.window button:focus-visible,
+.window select:focus-visible,
+.channel2-stats2 > a:focus-visible {
+  outline: 2px solid rgb(var(--sColorHighlight));
+  outline-offset: 1px;
+}
+.window select {
+  padding-right: 1.7em;
+  background-image:
+    linear-gradient(
+      60deg,
+      transparent 42%,
+      currentColor 42% 58%,
+      transparent 58%
+    ),
+    linear-gradient(
+      -60deg,
+      transparent 42%,
+      currentColor 42% 58%,
+      transparent 58%
+    );
+  background-position:
+    right 0.72em center,
+    right 0.4em center;
+  background-size:
+    0.42em 0.42em,
+    0.42em 0.42em;
+  background-repeat: no-repeat;
+}
+.window select:disabled,
+.window button:disabled {
+  color: rgba(var(--sColorButtons), 0.45);
+  background-color: rgba(var(--sColorButtons), 0.08);
+  box-shadow: inset 0 0 0 1px rgba(var(--sColorButtons), 0.22);
+}
+.window input[type="color"] {
+  border-radius: 0.4rem;
+  box-shadow: inset 0 0 0 1px rgba(var(--sColorButtons), 0.42);
+}
+.window input[type="color"]:enabled:hover,
+.window input[type="color"]:enabled:active {
+  box-shadow: inset 0 0 0 1px rgb(var(--sColorHighlight));
+}
+.window .inputNumber-number {
+  color: rgb(var(--sColorButtons));
+  background: rgba(var(--sColorButtons), 0.08);
+  text-shadow: none;
+  border-radius: 0;
+}
+.window .inputNumber-minus {
+  border-radius: 0.4rem 0 0 0.4rem;
+  border-right-color: rgba(var(--sColorButtons), 0.28);
+}
+.window .inputNumber-plus {
+  border-radius: 0 0.4rem 0.4rem 0;
+  border-left-color: rgba(var(--sColorButtons), 0.28);
+}
+.uianimation .window button,
+.uianimation .window select,
+.uianimation .channel2-stats2 > a {
+  transition:
+    background-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 .inputNumber-number.inputNumber-number {
   min-width: 5.2em;
