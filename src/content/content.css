@@ -118,11 +118,37 @@ a.tw5-drops-active svg {
   html .emote-picker__content-block,
   html .emote-picker__search-content-dark,
   html .chat-settings__popover,
-  html .reward-center__content {
+  html .reward-center__content,
+  html .rewards-popover-header,
+  html .reward-center__content .scrollable-area,
+  html .reward-center__content .scrollable-area > div {
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
     box-sizing: border-box;
+  }
+  html .chat-input .tw-balloon,
+  html .chat-input [class*="Attached-"] {
+    left: 0 !important;
+    right: auto !important;
+    width: calc(100vw - 12px) !important;
+    max-width: calc(100vw - 12px) !important;
+    max-height: calc(100vh - 5rem) !important;
+    box-sizing: border-box;
+    overflow: auto !important;
+  }
+  html .reward-center__content * {
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box;
+  }
+  html .bits-card-wrapper {
+    max-width: calc(100vw - 12px) !important;
+  }
+  html .bits-card-wrapper div {
+    flex-wrap: wrap !important;
+    max-width: 100%;
+    min-width: 0;
   }
   html .emote-picker__content-block {
     display: flex !important;
@@ -146,6 +172,9 @@ a.tw5-drops-active svg {
   html .chat-input__buttons-container > div:first-child {
     flex: 1 1 0 !important;
     min-width: 0;
+    overflow: visible !important;
+  }
+  html .community-points-summary {
     overflow: hidden;
   }
   html .community-points-summary,
