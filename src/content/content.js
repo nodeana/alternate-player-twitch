@@ -625,52 +625,129 @@ function sendTrackingForWatch(oMessage) {
   }).catch(NOOP);
 }
 
-function holdThemeChat() {
-  const isDark = Boolean(m_Settings.Get("isDarkenChat"));
-  const sNeeded = isDark ? "tw-root--theme-dark" : "tw-root--theme-light";
-  const sOther = isDark ? "tw-root--theme-light" : "tw-root--theme-dark";
-  const observed = new WeakSet();
-  const observer = new MutationObserver(() => {
-    watch(document.body, true);
-    watch(document.getElementById("root"), false);
-    apply();
-  });
-  function apply() {
-    for (const node of [
-      document.documentElement,
-      document.body,
-      document.getElementById("root"),
-    ]) {
-      if (!node || !node.classList.contains(sOther)) {
+function watchChatChannelAndTheme() {
+  const isDarkWanted = Boolean(m_Settings.Get("isDarkenChat"));
+  let sReported = "";
+  let nThemeTimer = 0;
+  function isChannelLogin(sCode) {
+    return (
+      /^[a-z0-9]\w{2,24}$/i.test(sCode) &&
+      !parseAddress.THIS_NOT_CODE_CHANNEL.has(sCode.toLowerCase())
+    );
+  }
+  function channelFromPage() {
+    const oAddress = parseAddress(location);
+    return oAddress.sPage === "CHAT_CHANNEL" &&
+      isChannelLogin(oAddress.sCodeChannel)
+      ? oAddress.sCodeChannel
+      : "";
+  }
+  function channelFromHeader() {
+    const nodeHeader = document.querySelector(".stream-chat-header");
+    if (!nodeHeader) {
+      return "";
+    }
+    for (const nodeLink of nodeHeader.querySelectorAll("a[href]")) {
+      let oUrl;
+      try {
+        oUrl = new URL(nodeLink.getAttribute("href"), location.origin);
+      } catch (_) {
         continue;
       }
-      node.classList.remove(sOther);
-      node.classList.add(sNeeded);
+      if (oUrl.host !== "www.twitch.tv" && oUrl.host !== "m.twitch.tv") {
+        continue;
+      }
+      const strsPart = oUrl.pathname.split("/").filter(Boolean);
+      const sCode =
+        strsPart[0] === "popout" && strsPart[2] === "chat"
+          ? strsPart[1]
+          : strsPart.length === 1
+            ? strsPart[0]
+            : "";
+      if (isChannelLogin(sCode)) {
+        return sCode;
+      }
     }
+    return "";
   }
-  function watch(node, isChildren) {
-    if (!node || observed.has(node)) {
+  function reportChannel(sCode) {
+    if (!sCode) {
       return;
     }
-    observed.add(node);
-    observer.observe(node, {
-      attributes: true,
-      attributeFilter: ["class"],
-      childList: isChildren,
+    const sKey = sCode.toLowerCase();
+    if (sKey === sReported) {
+      return;
+    }
+    sReported = sKey;
+    chrome.runtime.sendMessage({ request: "chat-channel", channel: sCode }, () => {
+      void chrome.runtime.lastError;
     });
   }
-  function connect() {
-    watch(document.documentElement, false);
-    watch(document.body, true);
-    watch(document.getElementById("root"), false);
-    apply();
+  function checkChannel() {
+    const sFromPage = channelFromPage();
+    const sFromHeader = channelFromHeader();
+    if (
+      sFromHeader &&
+      sFromPage &&
+      sFromHeader.toLowerCase() !== sFromPage.toLowerCase()
+    ) {
+      reportChannel(sFromHeader);
+      return;
+    }
+    reportChannel(sFromPage);
   }
-  connect();
-  if (!document.body) {
-    document.addEventListener("DOMContentLoaded", connect, {
-      once: true,
+  function checkTheme() {
+    const nodeHtml = document.documentElement;
+    const isDark = nodeHtml.classList.contains("tw-root--theme-dark");
+    const isLight = nodeHtml.classList.contains("tw-root--theme-light");
+    if (isDark === isDarkWanted || (!isDark && !isLight)) {
+      return;
+    }
+    const sCode = channelFromPage();
+    const sFromHeader = channelFromHeader();
+    if (!sCode || (sFromHeader && sFromHeader.toLowerCase() !== sCode.toLowerCase())) {
+      return;
+    }
+    let sPrevious = "";
+    try {
+      sPrevious = sessionStorage.getItem("tw5-theme-reload") || "";
+    } catch (_) {}
+    const [sPreviousChannel, sPreviousTime] = sPrevious.split(":");
+    if (
+      sPreviousChannel === sCode.toLowerCase() &&
+      Date.now() - Number(sPreviousTime) < 2e4
+    ) {
+      return;
+    }
+    try {
+      sessionStorage.setItem(
+        "tw5-theme-reload",
+        `${sCode.toLowerCase()}:${Date.now()}`,
+      );
+    } catch (_) {}
+    chrome.runtime.sendMessage({ request: "chat-theme", channel: sCode }, () => {
+      void chrome.runtime.lastError;
     });
   }
+  function scheduleTheme() {
+    clearTimeout(nThemeTimer);
+    nThemeTimer = setTimeout(checkTheme, 600);
+  }
+  window.addEventListener("tw5-pushstate", () => {
+    checkChannel();
+    scheduleTheme();
+  });
+  window.addEventListener("popstate", () => {
+    checkChannel();
+    scheduleTheme();
+  });
+  new MutationObserver(scheduleTheme).observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["class"],
+  });
+  setInterval(checkChannel, 1000);
+  checkChannel();
+  scheduleTheme();
 }
 
 function changeBehaviorChat() {
@@ -797,7 +874,7 @@ AddHandlerExceptions(() => {
       changeStyleChat();
       changeBehaviorChat();
     }
-    m_Settings.Restore().then(holdThemeChat).catch(NOOP);
+    m_Settings.Restore().then(watchChatChannelAndTheme).catch(NOOP);
     return;
   }
   removeLeftoversOldVersion();

@@ -8605,8 +8605,7 @@ const m_Twitch = (() => {
           sCodeChannel !== _sCodeChannel &&
           ThisNonemptyString(sCodeChannel)
         ) {
-          m_Log.Oops(`[Twitch] New2 code channel ${sCodeChannel}`);
-          location.replace(`?channel=${encodeURIComponent(sCodeChannel)}`);
+          followChannel(sCodeChannel);
           return;
         }
         const oMetadata = {
@@ -9146,9 +9145,44 @@ const m_Twitch = (() => {
     });
     return oListVariants;
   }
+  function followChannel(sCodeChannel) {
+    if (
+      !ThisNonemptyString(sCodeChannel) ||
+      sCodeChannel.toLowerCase() === _sCodeChannel.toLowerCase()
+    ) {
+      return;
+    }
+    m_Log.Ok(`[Twitch] Following channel ${sCodeChannel}`);
+    location.replace(`?channel=${encodeURIComponent(sCodeChannel)}`);
+  }
   const handleMessageChat = AddHandlerExceptions(
     (oMessage, oSender, fnReply) => {
       // console.log('[player.js] Message received:', oMessage, 'Sender:', oSender);
+      if (
+        oMessage.request === "chat-channel" ||
+        oMessage.request === "chat-theme"
+      ) {
+        if (
+          (oSender.tab ? oSender.tab.id : chrome.tabs.TAB_ID_NONE) !==
+          getCurrentTab.nIdTab
+        ) {
+          return false;
+        }
+        const sCode =
+          typeof oMessage.channel == "string" ? oMessage.channel : "";
+        if (!/^[a-z0-9]\w{2,24}$/i.test(sCode)) {
+          return false;
+        }
+        if (oMessage.request === "chat-channel") {
+          followChannel(sCode);
+          return false;
+        }
+        if (sCode.toLowerCase() === _sCodeChannel.toLowerCase()) {
+          m_Log.Ok("[Chat] Restoring saved Twitch theme");
+          m_Chat.ReloadPanel();
+        }
+        return false;
+      }
       if (oMessage.sRequest !== "InsertThirdpartyExtension") {
         return false;
       }
