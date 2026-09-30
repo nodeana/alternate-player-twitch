@@ -642,34 +642,6 @@ function watchChatChannelAndTheme() {
       ? oAddress.sCodeChannel
       : "";
   }
-  function channelFromHeader() {
-    const nodeHeader = document.querySelector(".stream-chat-header");
-    if (!nodeHeader) {
-      return "";
-    }
-    for (const nodeLink of nodeHeader.querySelectorAll("a[href]")) {
-      let oUrl;
-      try {
-        oUrl = new URL(nodeLink.getAttribute("href"), location.origin);
-      } catch (_) {
-        continue;
-      }
-      if (oUrl.host !== "www.twitch.tv" && oUrl.host !== "m.twitch.tv") {
-        continue;
-      }
-      const strsPart = oUrl.pathname.split("/").filter(Boolean);
-      const sCode =
-        strsPart[0] === "popout" && strsPart[2] === "chat"
-          ? strsPart[1]
-          : strsPart.length === 1
-            ? strsPart[0]
-            : "";
-      if (isChannelLogin(sCode)) {
-        return sCode;
-      }
-    }
-    return "";
-  }
   function reportChannel(sCode) {
     if (!sCode) {
       return;
@@ -684,17 +656,7 @@ function watchChatChannelAndTheme() {
     });
   }
   function checkChannel() {
-    const sFromPage = channelFromPage();
-    const sFromHeader = channelFromHeader();
-    if (
-      sFromHeader &&
-      sFromPage &&
-      sFromHeader.toLowerCase() !== sFromPage.toLowerCase()
-    ) {
-      reportChannel(sFromHeader);
-      return;
-    }
-    reportChannel(sFromPage);
+    reportChannel(channelFromPage());
   }
   function checkTheme() {
     const nodeHtml = document.documentElement;
@@ -704,8 +666,7 @@ function watchChatChannelAndTheme() {
       return;
     }
     const sCode = channelFromPage();
-    const sFromHeader = channelFromHeader();
-    if (!sCode || (sFromHeader && sFromHeader.toLowerCase() !== sCode.toLowerCase())) {
+    if (!sCode) {
       return;
     }
     let sPrevious = "";

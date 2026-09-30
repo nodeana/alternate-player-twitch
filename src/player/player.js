@@ -201,14 +201,18 @@ function getAllCookie(sAddress) {
     chrome.cookies.getAll(
       oParameters,
       AddHandlerExceptions((objsCookie) => {
-        if (!chrome.runtime.lastError && Array.isArray(objsCookie)) {
+        const sError =
+          chrome.runtime.lastError && chrome.runtime.lastError.message;
+        if (!sError && Array.isArray(objsCookie)) {
           m_Log.Here(`[API] Count cookies: ${objsCookie.length}`);
           fnExecute(objsCookie);
+        } else if (
+          sError &&
+          /context invalidated|message port closed/i.test(sError)
+        ) {
+          fnExecute([]);
         } else {
-          console.error(
-            "cookies.getAll",
-            chrome.runtime.lastError && chrome.runtime.lastError.message,
-          );
+          console.error("cookies.getAll", sError);
           m_Debug.FinishWorkAndShowMessage("J0221");
         }
       }),
@@ -695,13 +699,22 @@ const m_Debug = (() => {
       );
     });
   }
-  function FinishWorkAndShowMessage(sCodeMessage, sCodeLinks, sAddressLinks) {
+  function FinishWorkAndShowMessage(
+    sCodeMessage,
+    sCodeLinks,
+    sAddressLinks,
+    isNotice,
+  ) {
     if (!g_isWorkFinished) {
-      console.error(sCodeMessage);
+      if (!isNotice) {
+        console.error(sCodeMessage);
+      }
       FinishWork(false);
       ShowMessage(Text(sCodeMessage), sCodeLinks, sAddressLinks, sCodeMessage);
     }
-    throw void 0;
+    if (!isNotice) {
+      throw void 0;
+    }
   }
   function FinishWorkAndSendReport(sReasonFinishWork, bufSend) {
     if (!g_isWorkFinished) {
@@ -9489,34 +9502,54 @@ function FinishWork(isFast) {
 AddHandlerExceptions(() => {
   function ThisChannelAlreadyOpen(sChannel) {
     Assert(ThisNonemptyString(sChannel));
-    chrome.runtime.sendMessage(
-      {
-        sRequest: "ThisChannelAlreadyOpen",
-        sChannel,
-      },
-      (pResponse) => {
-        // No response is normal when the channel is not open in another tab.
-        // Without checking lastError, Chrome logs: "Unchecked runtime.lastError: The message port closed before a response was received."
-        if (chrome.runtime.lastError) {
+    const sToken = `${Date.now()}-${Math.random()}`;
+    return new Promise((fnResolve) => {
+      let isSettled = false;
+      let nTimer = 0;
+      const finish = (isDuplicate) => {
+        if (isSettled) {
           return;
         }
-        if (pResponse === true) {
-          m_Debug.FinishWorkAndShowMessage("J0211");
+        isSettled = true;
+        clearTimeout(nTimer);
+        fnResolve(isDuplicate);
+      };
+      nTimer = setTimeout(() => finish(false), 1500);
+      chrome.runtime.sendMessage(
+        {
+          sRequest: "ThisChannelAlreadyOpen",
+          sChannel,
+          sToken,
+        },
+        (pResponse) => {
+          // No response is normal when the channel is not open in another tab.
+          // Without checking lastError, Chrome logs: "Unchecked runtime.lastError: The message port closed before a response was received."
+          void chrome.runtime.lastError;
+          finish(pResponse === true);
+        },
+      );
+      chrome.runtime.onMessage.addListener((oMessage, oSender, fnReply) => {
+        if (!oMessage || oMessage.sRequest !== "ThisChannelAlreadyOpen") {
+          return;
         }
-      },
-    );
-    chrome.runtime.onMessage.addListener(
-      AddHandlerExceptions((oMessage, _, fnReply) => {
-        if (oMessage.sRequest === "ThisChannelAlreadyOpen") {
-          m_Log.Oops(
-            `[Launcher] IN other tab open3 channel2 ${oMessage.sChannel}`,
-          );
-          if (oMessage.sChannel === sChannel) {
-            fnReply(true);
-          }
+        if (oMessage.sToken === sToken || oMessage.sChannel !== sChannel) {
+          return;
         }
-      }),
-    );
+        const nSenderTab = oSender.tab
+          ? oSender.tab.id
+          : chrome.tabs.TAB_ID_NONE;
+        if (
+          Number.isSafeInteger(getCurrentTab.nIdTab) &&
+          nSenderTab === getCurrentTab.nIdTab
+        ) {
+          return;
+        }
+        m_Log.Oops(
+          `[Launcher] IN other tab open3 channel2 ${oMessage.sChannel}`,
+        );
+        fnReply(true);
+      });
+    });
   }
   function HandleUnloadPage(oEvent) {
     m_Log.Ok(`[Launcher] window.on${oEvent.type}`);
@@ -9546,13 +9579,19 @@ AddHandlerExceptions(() => {
   const sChannel = (
     new URLSearchParams(location.search.slice(1)).get("channel") || "channel"
   ).toLowerCase();
-  ThisChannelAlreadyOpen(sChannel);
-  Promise.all([
-    assertPermissionExtension(),
-    m_Settings.Restore(),
-    getCurrentTab(),
-  ])
-    .then(() => m_Twitch.start2(sChannel))
-    .then(StartWork)
+  ThisChannelAlreadyOpen(sChannel)
+    .then((isDuplicate) => {
+      if (isDuplicate) {
+        m_Debug.FinishWorkAndShowMessage("J0211", null, null, true);
+        return;
+      }
+      return Promise.all([
+        assertPermissionExtension(),
+        m_Settings.Restore(),
+        getCurrentTab(),
+      ])
+        .then(() => m_Twitch.start2(sChannel))
+        .then(StartWork);
+    })
     .catch(m_Debug.CaughtException);
 })();
