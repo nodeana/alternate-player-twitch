@@ -625,10 +625,8 @@ function sendTrackingForWatch(oMessage) {
   }).catch(NOOP);
 }
 
-function watchChatChannelAndTheme() {
-  const isDarkWanted = Boolean(m_Settings.Get("isDarkenChat"));
+function watchChatChannel() {
   let sReported = "";
-  let nThemeTimer = 0;
   function isChannelLogin(sCode) {
     return (
       /^[a-z0-9]\w{2,24}$/i.test(sCode) &&
@@ -658,57 +656,10 @@ function watchChatChannelAndTheme() {
   function checkChannel() {
     reportChannel(channelFromPage());
   }
-  function checkTheme() {
-    const nodeHtml = document.documentElement;
-    const isDark = nodeHtml.classList.contains("tw-root--theme-dark");
-    const isLight = nodeHtml.classList.contains("tw-root--theme-light");
-    if (isDark === isDarkWanted || (!isDark && !isLight)) {
-      return;
-    }
-    const sCode = channelFromPage();
-    if (!sCode) {
-      return;
-    }
-    let sPrevious = "";
-    try {
-      sPrevious = sessionStorage.getItem("tw5-theme-reload") || "";
-    } catch (_) {}
-    const [sPreviousChannel, sPreviousTime] = sPrevious.split(":");
-    if (
-      sPreviousChannel === sCode.toLowerCase() &&
-      Date.now() - Number(sPreviousTime) < 2e4
-    ) {
-      return;
-    }
-    try {
-      sessionStorage.setItem(
-        "tw5-theme-reload",
-        `${sCode.toLowerCase()}:${Date.now()}`,
-      );
-    } catch (_) {}
-    chrome.runtime.sendMessage({ request: "chat-theme", channel: sCode }, () => {
-      void chrome.runtime.lastError;
-    });
-  }
-  function scheduleTheme() {
-    clearTimeout(nThemeTimer);
-    nThemeTimer = setTimeout(checkTheme, 600);
-  }
-  window.addEventListener("tw5-pushstate", () => {
-    checkChannel();
-    scheduleTheme();
-  });
-  window.addEventListener("popstate", () => {
-    checkChannel();
-    scheduleTheme();
-  });
-  new MutationObserver(scheduleTheme).observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ["class"],
-  });
+  window.addEventListener("tw5-pushstate", checkChannel);
+  window.addEventListener("popstate", checkChannel);
   setInterval(checkChannel, 1000);
   checkChannel();
-  scheduleTheme();
 }
 
 function changeBehaviorChat() {
@@ -835,7 +786,7 @@ AddHandlerExceptions(() => {
       changeStyleChat();
       changeBehaviorChat();
     }
-    m_Settings.Restore().then(watchChatChannelAndTheme).catch(NOOP);
+    m_Settings.Restore().then(watchChatChannel).catch(NOOP);
     return;
   }
   removeLeftoversOldVersion();

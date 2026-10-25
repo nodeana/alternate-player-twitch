@@ -9171,10 +9171,7 @@ const m_Twitch = (() => {
   const handleMessageChat = AddHandlerExceptions(
     (oMessage, oSender, fnReply) => {
       // console.log('[player.js] Message received:', oMessage, 'Sender:', oSender);
-      if (
-        oMessage.request === "chat-channel" ||
-        oMessage.request === "chat-theme"
-      ) {
+      if (oMessage.request === "chat-channel") {
         if (
           (oSender.tab ? oSender.tab.id : chrome.tabs.TAB_ID_NONE) !==
           getCurrentTab.nIdTab
@@ -9186,14 +9183,7 @@ const m_Twitch = (() => {
         if (!/^[a-z0-9]\w{2,24}$/i.test(sCode)) {
           return false;
         }
-        if (oMessage.request === "chat-channel") {
-          followChannel(sCode);
-          return false;
-        }
-        if (sCode.toLowerCase() === _sCodeChannel.toLowerCase()) {
-          m_Log.Ok("[Chat] Restoring saved Twitch theme");
-          m_Chat.ReloadPanel();
-        }
+        followChannel(sCode);
         return false;
       }
       if (oMessage.sRequest !== "InsertThirdpartyExtension") {
