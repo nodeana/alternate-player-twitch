@@ -2,6 +2,14 @@
 :root {
   color-scheme: light;
   scrollbar-color: #bbb #999a;
+  background: #000;
+  --sColorBackground: 14, 14, 16;
+  --sColorGradient: 239, 239, 241;
+  --sColorButtons: 239, 239, 241;
+  --sColorHeader: 239, 239, 241;
+  --sColorHighlight: 145, 71, 255;
+  --nOpacity: 1;
+  --nOpacityWindow: 1;
 }
 input,
 button,
@@ -291,9 +299,21 @@ body {
   gap: 0.5rem;
   justify-content: center;
 }
-.hidechat #chatsize,
-.hidechat #chat2-shell {
+.hidechat #chatsize {
   display: none;
+}
+.hidechat #chat2-shell {
+  position: fixed !important;
+  right: 0;
+  bottom: 0;
+  width: 340px !important;
+  height: 480px !important;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 0;
 }
 #chatsize {
   flex: 0 0 0.625rem;

@@ -226,9 +226,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
   if (message.request === "RegisterChatFrame") {
-    if (sender.tab && sender.tab.id != null && sender.frameId != null) {
-      chatFrame = { tabId: sender.tab.id, frameId: sender.frameId };
-    }
+    rememberChatFrame(sender);
     sendResponse({ status: "ok" });
     return false;
   }
@@ -237,7 +235,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       sendResponse({ status: "No frame." });
       return false;
     }
-    chatFrame = { tabId: sender.tab.id, frameId: sender.frameId };
+    rememberChatFrame(sender);
     insertThirdPartyExtensions(sender.tab.id, sender.frameId)
       .then(() => sendResponse({ status: "Injections started." }))
       .catch((error) => {
@@ -304,6 +302,48 @@ async function insertThirdPartyExtensions(tabId, frameId) {
   });
 }
 
-let keepAliveInterval = setInterval(() => {
-  chrome.runtime.getPlatformInfo(() => {});
-}, 20000);
+function rememberChatFrame(sender) {
+  if (sender.tab && sender.tab.id != null && sender.frameId != null) {
+    chatFrame = { tabId: sender.tab.id, frameId: sender.frameId };
+  }
+}
+
+chrome.runtime.onConnect.addListener((port) => {
+  if (port.name !== "tw5-chat" && port.name !== "tw5-player") {
+    return;
+  }
+  if (port.name === "tw5-chat") {
+    rememberChatFrame(port.sender || {});
+  }
+  port.onDisconnect.addListener(() => {
+    void chrome.runtime.lastError;
+    const sender = port.sender;
+    if (
+      port.name === "tw5-chat" &&
+      chatFrame &&
+      sender &&
+      sender.tab &&
+      chatFrame.tabId === sender.tab.id &&
+      chatFrame.frameId === sender.frameId
+    ) {
+      chatFrame = null;
+    }
+  });
+});
+
+function restoreAdProxyFlag() {
+  if (!chrome.proxy || !chrome.proxy.settings) {
+    return;
+  }
+  chrome.proxy.settings.get({}, (details) => {
+    if (chrome.runtime.lastError || !details || !details.value) {
+      return;
+    }
+    const pac = details.value.pacScript;
+    const data = pac && pac.data;
+    adProxyOn =
+      typeof data === "string" && data.includes(`${AD_PROXY.host}:${AD_PROXY.port}`);
+  });
+}
+
+restoreAdProxyFlag();

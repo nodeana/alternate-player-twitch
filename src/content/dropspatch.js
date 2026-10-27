@@ -209,17 +209,27 @@
   }
 
   if (!window.__tw5_drops_icon_observer__) {
+    let nHighlightTimer = 0;
     window.__tw5_drops_icon_observer__ = new MutationObserver(() => {
-      const campaigns =
-        window.__tw5_drops_gql_cache__.DropsHighlightService_AvailableDrops
-          ?.data?.channel?.viewerDropCampaigns?.length || 0;
-      const session = Boolean(
-        window.__tw5_drops_gql_cache__.DropCurrentSessionContext?.data
-          ?.currentUser?.dropCurrentSession,
-      );
-      if (campaigns > 0 || session) {
-        updateDropsIconHighlight(true);
+      if (nHighlightTimer !== 0) {
+        return;
       }
+      nHighlightTimer = setTimeout(() => {
+        nHighlightTimer = 0;
+        if (document.hidden) {
+          return;
+        }
+        const campaigns =
+          window.__tw5_drops_gql_cache__.DropsHighlightService_AvailableDrops
+            ?.data?.channel?.viewerDropCampaigns?.length || 0;
+        const session = Boolean(
+          window.__tw5_drops_gql_cache__.DropCurrentSessionContext?.data
+            ?.currentUser?.dropCurrentSession,
+        );
+        if (campaigns > 0 || session) {
+          updateDropsIconHighlight(true);
+        }
+      }, 500);
     });
     window.__tw5_drops_icon_observer__.observe(document.documentElement, {
       childList: true,

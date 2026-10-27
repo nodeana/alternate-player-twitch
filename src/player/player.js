@@ -9344,11 +9344,10 @@ const m_Subtitles = (() => {
     return timeServer() - nLatency;
   }
   function showReplica() {
-    const node = byId("subtitles");
     if (!_isEnabled) {
-      node.hidden = true;
       return;
     }
+    const node = byId("subtitles");
     const nNow = timePicture();
     const sText = _objsReplica
       .filter((oReplica) => nNow >= oReplica.nStart && nNow < oReplica.nEnd)
@@ -9545,8 +9544,29 @@ AddHandlerExceptions(() => {
     m_Log.Ok(`[Launcher] window.on${oEvent.type}`);
     FinishWork(true);
   }
+  function keepWorkerAlive() {
+    let port = null;
+    function connect() {
+      try {
+        port = chrome.runtime.connect({ name: "tw5-player" });
+      } catch (_) {
+        return;
+      }
+      port.onDisconnect.addListener(() => {
+        port = null;
+        const sError =
+          chrome.runtime.lastError && chrome.runtime.lastError.message;
+        if (sError && sError.includes("invalidated")) {
+          return;
+        }
+        setTimeout(connect, 1000);
+      });
+    }
+    connect();
+  }
   function StartWork() {
     Assert(!g_isWorkFinished);
+    keepWorkerAlive();
     try {
       chrome.runtime.sendMessage({ request: "ad-proxy", enabled: false });
     } catch (_) {}

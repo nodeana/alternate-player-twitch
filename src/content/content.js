@@ -625,8 +625,29 @@ function sendTrackingForWatch(oMessage) {
   }).catch(NOOP);
 }
 
+function keepWorkerAlive(sName) {
+  let port = null;
+  function connect() {
+    try {
+      port = chrome.runtime.connect({ name: sName });
+    } catch (_) {
+      return;
+    }
+    port.onDisconnect.addListener(() => {
+      port = null;
+      const sError = chrome.runtime.lastError && chrome.runtime.lastError.message;
+      if (sError && sError.includes("invalidated")) {
+        return;
+      }
+      setTimeout(connect, 1000);
+    });
+  }
+  connect();
+}
+
 function watchChatChannel() {
   let sReported = "";
+  let sSeenHref = "";
   function isChannelLogin(sCode) {
     return (
       /^[a-z0-9]\w{2,24}$/i.test(sCode) &&
@@ -654,6 +675,10 @@ function watchChatChannel() {
     });
   }
   function checkChannel() {
+    if (location.href === sSeenHref) {
+      return;
+    }
+    sSeenHref = location.href;
     reportChannel(channelFromPage());
   }
   window.addEventListener("tw5-pushstate", checkChannel);
@@ -712,10 +737,15 @@ AddHandlerExceptions(() => {
   try {
     sessionStorage.removeItem("tw5-reloading-extension");
   } catch (_) {}
+  const oAddress = parseAddress(location);
+  if (oAddress.sPage !== "CHAT_CHANNEL" && window.top !== window) {
+    return;
+  }
   m_Log.Ok(
     `[content.js] Started ${performance.now().toFixed()}strs ${location.href}`,
   );
-  if (parseAddress(location).sPage === "CHAT_CHANNEL") {
+  if (oAddress.sPage === "CHAT_CHANNEL") {
+    keepWorkerAlive("tw5-chat");
     chrome.runtime.sendMessage({ request: "RegisterChatFrame" }, () => {
       void chrome.runtime.lastError;
     });

@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
-  "minimum_chrome_version": "102",
+  "minimum_chrome_version": "111",
   "name": "Alternate Player for Twitch.tv",
   "short_name": "Alternate Player",
-  "version": "2026.9.30",
+  "version": "2026.10.27",
   "description": "__MSG_M0001__",
   "icons": {
     "128": "assets/icon.png"
@@ -46,34 +46,58 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://www.twitch.tv/*"],
-      "exclude_matches": ["https://www.twitch.tv/popout/"],
+      "matches": ["https://www.twitch.tv/*", "https://m.twitch.tv/*"],
+      "exclude_matches": [
+        "https://www.twitch.tv/popout/*",
+        "https://www.twitch.tv/embed/*",
+        "https://m.twitch.tv/popout/*",
+        "https://m.twitch.tv/embed/*"
+      ],
+      "js": ["src/content/autoclaim.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://www.twitch.tv/popout/*/chat*",
+        "https://www.twitch.tv/embed/*/chat*",
+        "https://m.twitch.tv/popout/*/chat*",
+        "https://m.twitch.tv/embed/*/chat*"
+      ],
       "js": ["src/content/autoclaim.js"],
       "all_frames": true,
       "run_at": "document_idle"
     },
     {
-      "matches": ["https://www.twitch.tv/popout/*/chat*"],
-      "js": ["src/content/autoclaim.js"],
-      "all_frames": true,
-      "run_at": "document_idle"
-    },
-    {
-      "matches": ["https://www.twitch.tv/popout/*/chat*"],
+      "matches": [
+        "https://www.twitch.tv/popout/*/chat*",
+        "https://www.twitch.tv/embed/*/chat*",
+        "https://m.twitch.tv/popout/*/chat*",
+        "https://m.twitch.tv/embed/*/chat*"
+      ],
       "js": ["src/content/dropspatch.js"],
       "all_frames": true,
       "run_at": "document_start",
       "world": "MAIN"
     },
     {
-      "matches": ["https://www.twitch.tv/embed/*/chat*"],
-      "js": ["src/content/dropspatch.js"],
-      "all_frames": true,
+      "matches": ["https://www.twitch.tv/*", "https://m.twitch.tv/*"],
+      "exclude_matches": [
+        "https://www.twitch.tv/popout/*",
+        "https://www.twitch.tv/embed/*",
+        "https://m.twitch.tv/popout/*",
+        "https://m.twitch.tv/embed/*"
+      ],
+      "js": ["src/content/gqltoken.js"],
       "run_at": "document_start",
       "world": "MAIN"
     },
     {
-      "matches": ["https://www.twitch.tv/*"],
+      "matches": [
+        "https://www.twitch.tv/popout/*/chat*",
+        "https://www.twitch.tv/embed/*/chat*",
+        "https://m.twitch.tv/popout/*/chat*",
+        "https://m.twitch.tv/embed/*/chat*"
+      ],
       "js": ["src/content/gqltoken.js"],
       "all_frames": true,
       "run_at": "document_start",
@@ -81,7 +105,23 @@
     },
     {
       "matches": ["https://www.twitch.tv/*", "https://m.twitch.tv/*"],
-      "exclude_matches": ["https://www.twitch.tv/popout/"],
+      "exclude_matches": [
+        "https://www.twitch.tv/popout/*",
+        "https://www.twitch.tv/embed/*",
+        "https://m.twitch.tv/popout/*",
+        "https://m.twitch.tv/embed/*"
+      ],
+      "js": ["src/content/pagehook.js"],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "https://www.twitch.tv/popout/*/chat*",
+        "https://www.twitch.tv/embed/*/chat*",
+        "https://m.twitch.tv/popout/*/chat*",
+        "https://m.twitch.tv/embed/*/chat*"
+      ],
       "js": ["src/content/pagehook.js"],
       "all_frames": true,
       "run_at": "document_start",
@@ -89,13 +129,22 @@
     },
     {
       "matches": ["https://www.twitch.tv/*", "https://m.twitch.tv/*"],
-      "exclude_matches": ["https://www.twitch.tv/popout/"],
+      "exclude_matches": [
+        "https://www.twitch.tv/popout/*",
+        "https://www.twitch.tv/embed/*",
+        "https://m.twitch.tv/popout/*",
+        "https://m.twitch.tv/embed/*"
+      ],
       "js": ["src/shared/common.js", "src/content/content.js"],
-      "all_frames": true,
       "run_at": "document_start"
     },
     {
-      "matches": ["https://www.twitch.tv/popout/*/chat*"],
+      "matches": [
+        "https://www.twitch.tv/popout/*/chat*",
+        "https://www.twitch.tv/embed/*/chat*",
+        "https://m.twitch.tv/popout/*/chat*",
+        "https://m.twitch.tv/embed/*/chat*"
+      ],
       "js": ["src/shared/common.js", "src/content/content.js"],
       "all_frames": true,
       "run_at": "document_start"

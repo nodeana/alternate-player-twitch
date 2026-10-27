@@ -3,7 +3,22 @@
 // Runs in the page MAIN world (see manifest content_scripts.world).
 // Patches history/title so SPA channel changes notify the isolated content script.
 
+function thisFrameNeedsHook() {
+  if (window.top === window) {
+    return true;
+  }
+  const strsPart = location.pathname.split("/");
+  return (
+    (strsPart[1] === "embed" || strsPart[1] === "popout") &&
+    Boolean(strsPart[2]) &&
+    strsPart[3] === "chat"
+  );
+}
+
 (function captureFunction() {
+  if (!thisFrameNeedsHook()) {
+    return;
+  }
   let _isNotCapture = false;
   window.addEventListener("tw5-nocapture", () => {
     _isNotCapture = true;

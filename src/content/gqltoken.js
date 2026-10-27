@@ -4,6 +4,16 @@
 // Hooks fetch so GQL integrity tokens can be persisted for the player.
 
 (function captureFunction2() {
+  if (window.top !== window) {
+    const strsPart = location.pathname.split("/");
+    const isChat =
+      (strsPart[1] === "embed" || strsPart[1] === "popout") &&
+      strsPart[2] &&
+      strsPart[3] === "chat";
+    if (!isChat) {
+      return;
+    }
+  }
   const originalFunction = window.fetch;
   window.fetch = function (address, parameters) {
     const promise = originalFunction(address, parameters);

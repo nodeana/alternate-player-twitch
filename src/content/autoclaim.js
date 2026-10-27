@@ -1,6 +1,16 @@
 ﻿"use strict";
 
 (function () {
+  if (window.top !== window) {
+    const strsPart = location.pathname.split("/");
+    const isChat =
+      (strsPart[1] === "embed" || strsPart[1] === "popout") &&
+      strsPart[2] &&
+      strsPart[3] === "chat";
+    if (!isChat) {
+      return;
+    }
+  }
   let stableButton = null;
   let stableSince = 0;
   let lastClick = 0;
